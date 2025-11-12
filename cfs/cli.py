@@ -7,14 +7,12 @@ Uses Click for command-line interface with framework-specific generators.
 import click
 import sys
 from pathlib import Path
-from typing import  Any
+from typing import Tuple, Type, Any
+from cfs.modules.templates.springboot.core.spring_generator import SpringGenerator
+from cfs.modules.templates.springboot.core.spring_manifest_loader import SpringManifestLoader
 
-from modules.templates.springboot.core.spring_generator import SpringGenerator
-from modules.templates.springboot.core.spring_manifest_loader import SpringManifestLoader
 
-
-def get_framework_modules(template_name: str) -> None | tuple[Any, Any] | tuple[
-    type[SpringGenerator], type[SpringManifestLoader]]:
+def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
     """
     Get framework-specific generator and manifest loader classes.
     Uses match/case for framework selection (Python 3.10+).
@@ -31,19 +29,17 @@ def get_framework_modules(template_name: str) -> None | tuple[Any, Any] | tuple[
     match template_name:
         case 'springboot':
             try:
-                from modules.templates.springboot.core.spring_generator import SpringGenerator
-                from modules.templates.springboot.core.spring_manifest_loader import SpringManifestLoader
                 return SpringGenerator, SpringManifestLoader
             except ImportError as e:
                 raise ImportError(f"Failed to load Spring Boot modules: {e}")
 
-        case 'flutter':
-            try:
-                from modules.templates.flutter.core.flutter_generator import FlutterGenerator
-                from modules.templates.flutter.core.flutter_manifest_loader import FlutterManifestLoader
-                return FlutterGenerator, FlutterManifestLoader
-            except ImportError as e:
-                raise ImportError(f"Failed to load Flutter modules: {e}")
+        # case 'flutter':
+        #     try:
+        #         from modules.templates.flutter.core.flutter_generator import FlutterGenerator
+        #         from modules.templates.flutter.core.flutter_manifest_loader import FlutterManifestLoader
+        #         return FlutterGenerator, FlutterManifestLoader
+        #     except ImportError as e:
+        #         raise ImportError(f"Failed to load Flutter modules: {e}")
 
         # case 'react':
         #     try:
@@ -52,7 +48,7 @@ def get_framework_modules(template_name: str) -> None | tuple[Any, Any] | tuple[
         #         return ReactGenerator, ReactManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load React modules: {e}")
-        #
+
         # case 'django':
         #     try:
         #         from modules.templates.django.core.django_generator import DjangoGenerator
@@ -60,7 +56,7 @@ def get_framework_modules(template_name: str) -> None | tuple[Any, Any] | tuple[
         #         return DjangoGenerator, DjangoManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load Django modules: {e}")
-        #
+
         # case 'nextjs':
         #     try:
         #         from modules.templates.nextjs.core.nextjs_generator import NextJSGenerator
@@ -68,7 +64,7 @@ def get_framework_modules(template_name: str) -> None | tuple[Any, Any] | tuple[
         #         return NextJSGenerator, NextJSManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load Next.js modules: {e}")
-        #
+
         # case 'fastapi':
         #     try:
         #         from modules.templates.fastapi.core.fastapi_generator import FastAPIGenerator
@@ -76,7 +72,7 @@ def get_framework_modules(template_name: str) -> None | tuple[Any, Any] | tuple[
         #         return FastAPIGenerator, FastAPIManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load FastAPI modules: {e}")
-        #
+
         # case 'express':
         #     try:
         #         from modules.templates.express.core.express_generator import ExpressGenerator
@@ -84,7 +80,7 @@ def get_framework_modules(template_name: str) -> None | tuple[Any, Any] | tuple[
         #         return ExpressGenerator, ExpressManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load Express modules: {e}")
-        #
+
         # case 'vue':
         #     try:
         #         from modules.templates.vue.core.vue_generator import VueGenerator
@@ -92,19 +88,19 @@ def get_framework_modules(template_name: str) -> None | tuple[Any, Any] | tuple[
         #         return VueGenerator, VueManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load Vue modules: {e}")
-        #
-        # case _:
-        #     raise ImportError(
-        #         f"Unknown template '{template_name}'. "
-        #         f"Supported frameworks: springboot, flutter, react, django, nextjs, fastapi, express, vue"
-        #     )
-    return None
+
+        case _:
+            raise ImportError(
+                f"Unknown template '{template_name}'. "
+                f"Supported frameworks: springboot, flutter, react, django, nextjs, fastapi, express, vue"
+            )
 
 
 def list_available_templates() -> None:
     """List all available templates by scanning the templates directory."""
     base_dir = Path(__file__).resolve().parent
     templates_dir = (base_dir / 'modules' / 'templates').resolve()
+    print('--------- ' , base_dir , '---------')
 
     if not templates_dir.exists():
         click.echo("No templates directory found.", err=True)
@@ -161,13 +157,11 @@ def init(template_name, project_name, package_name, language, api_protocol,
     """
 
     # Get the templates directory
-    # cli.py is in cfs/cfs/cli.py, so go up one level to get to project root
-    base_dir = Path(__file__).resolve().parent.parent
+    base_dir = Path(__file__).resolve().parent
     template_path = (base_dir / 'modules' / 'templates' / template_name).resolve()
 
     if not template_path.exists():
         click.echo(f"❌ Template '{template_name}' not found.", err=True)
-        print('-------------' , base_dir)
         list_available_templates()
         sys.exit(1)
 

@@ -103,6 +103,39 @@ structure:
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models/User.{{ file_extension }}"
     type: file
     source: "User.{{ file_extension }}.j2"
+
+  # Config layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/configs"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/configs/.gitkeep"
+    type: file
+    source: "gitkeep.j2"
+
+  # Enums
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/enums"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/enums/UserRolesEnum.{{file_extension}}"
+    type: file
+    source: "UserRolesEnum.{{file_extension}}.j2"
+
+  #Service layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/services"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/services/UserService.{{ file_extension }}"
+    type: file
+    source: "UserService.{{ file_extension }}.j2"
+
+  #Implementation layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/impls"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/impls/UserServiceImpl.{{ file_extension }}"
+    type: file
+    source: "UserServiceImpl.{{ file_extension }}.j2"
+
     
   # Repository layer
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/repositories"
@@ -129,6 +162,7 @@ structure:
     
   - path: "{{ project_name }}/src/test/{{ language_dir }}/{{ package_path }}"
     type: dir
+
 # Hooks execute shell scripts at specific points in the generation lifecycle
 hooks:
   pre_gen:
