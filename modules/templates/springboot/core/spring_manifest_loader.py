@@ -14,6 +14,126 @@ class SpringManifestValidationError(Exception):
     pass
 
 
+def _validate_computed_variables(computed: Dict[str, Any]) -> None:
+    """Validate Spring Boot computed variables."""
+    required_computed = ['package_path', 'main_class_name', 'language_dir', 'file_extension']
+
+    for var in required_computed:
+        if var not in computed:
+            raise SpringManifestValidationError(
+                f"Missing required computed variable for Spring Boot: {var}"
+            )
+
+
+def _validate_spring_file_path(path: str, source: str) -> None:
+    """Validate Spring Boot specific file paths."""
+    # Check for Application file
+    if 'Application.' in path:
+        if not ('{{ file_extension }}' in path or path.endswith('.java') or path.endswith('.kt')):
+            raise SpringManifestValidationError(
+                f"Application file must use dynamic file extension: {path}"
+            )
+
+    # Check for pom.xml or build.gradle
+    if 'pom.xml' in path or 'build.gradle' in path:
+        if not source:
+            raise SpringManifestValidationError(
+                f"Build file must have a template source: {path}"
+            )
+
+
+def _is_valid_java_package(package: str) -> bool:
+    """Check if string is a valid Java package name."""
+    pattern = r'^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$'
+    return bool(re.match(pattern, package))
+
+
+def _is_valid_artifact_id(artifact_id: str) -> bool:
+    """Check if string is a valid Maven artifact ID."""
+    pattern = r'^[a-z][a-z0-9-]*$'
+    return bool(re.match(pattern, artifact_id))
+
+
+def _validate_package_name_config(var_name: str, config: Dict[str, Any]) -> None:
+    """Validate package_name variable configuration."""
+    validation = config.get('validation')
+    if not validation:
+        raise SpringManifestValidationError(
+            "package_name must have validation regex for Java package format"
+        )
+
+    # Check that validation allows Java package format
+    test_package = "com.example.app"
+    if not re.match(validation, test_package):
+        raise SpringManifestValidationError(
+            f"package_name validation regex must accept valid Java packages like '{test_package}'"
+        )
+
+
+def _validate_spring_structure(structure: List[Dict[str, Any]]) -> None:
+    """
+    Validate Spring Boot specific structure definitions.
+
+    Args:
+        structure: List of structure items
+
+    Raises:
+        SpringManifestValidationError: If validation fails
+    """
+    if not isinstance(structure, list):
+        raise SpringManifestValidationError("Structure must be a list")
+
+    # Check for required Spring Boot directories
+    required_paths = [
+        'src/main/{{ language_dir }}',
+        'src/main/resources',
+        'src/test/{{ language_dir }}'
+    ]
+
+    structure_paths = [item.get('path', '') for item in structure]
+
+    for required in required_paths:
+        # Check if any path contains the required path
+        found = any(required in path for path in structure_paths)
+        if not found:
+            raise SpringManifestValidationError(
+                f"Spring Boot structure must include: {required}"
+            )
+
+    for idx, item in enumerate(structure):
+        if not isinstance(item, dict):
+            raise SpringManifestValidationError(
+                f"Structure item {idx} must be a dictionary"
+            )
+
+        if 'path' not in item:
+            raise SpringManifestValidationError(
+                f"Structure item {idx} missing required 'path' field"
+            )
+
+        if 'type' not in item:
+            raise SpringManifestValidationError(
+                f"Structure item {idx} missing required 'type' field"
+            )
+
+        item_type = item['type']
+        if item_type not in ['dir', 'file']:
+            raise SpringManifestValidationError(
+                f"Structure item {idx} has invalid type '{item_type}'"
+            )
+
+        # Files must have a source
+        if item_type == 'file' and 'source' not in item:
+            raise SpringManifestValidationError(
+                f"File structure item {idx} (path: {item['path']}) must have 'source' field"
+            )
+
+        # Validate Spring Boot file patterns
+        path = item['path']
+        if item_type == 'file':
+            _validate_spring_file_path(path, item.get('source', ''))
+
+
 class SpringManifestLoader:
     """Loads and validates Spring Boot template manifests."""
     
@@ -87,11 +207,11 @@ class SpringManifestLoader:
         
         # Validate structure if present
         if 'structure' in manifest:
-            self._validate_spring_structure(manifest['structure'])
+            _validate_spring_structure(manifest['structure'])
         
         # Validate computed variables
         if 'computed' in manifest:
-            self._validate_computed_variables(manifest['computed'])
+            _validate_computed_variables(manifest['computed'])
     
     def _validate_spring_variables(self, variables: Dict[str, Any]) -> None:
         """
@@ -119,7 +239,7 @@ class SpringManifestLoader:
             
             # Validate Spring Boot specific variables
             if var_name == 'package_name':
-                self._validate_package_name_config(var_name, var_config)
+                _validate_package_name_config(var_name, var_config)
             elif var_name == 'language':
                 self._validate_language_config(var_name, var_config)
             elif var_name == 'java_version':
@@ -149,22 +269,7 @@ class SpringManifestLoader:
                     raise SpringManifestValidationError(
                         f"Invalid validation regex for variable '{var_name}': {e}"
                     )
-    
-    def _validate_package_name_config(self, var_name: str, config: Dict[str, Any]) -> None:
-        """Validate package_name variable configuration."""
-        validation = config.get('validation')
-        if not validation:
-            raise SpringManifestValidationError(
-                "package_name must have validation regex for Java package format"
-            )
-        
-        # Check that validation allows Java package format
-        test_package = "com.example.app"
-        if not re.match(validation, test_package):
-            raise SpringManifestValidationError(
-                f"package_name validation regex must accept valid Java packages like '{test_package}'"
-            )
-    
+
     def _validate_language_config(self, var_name: str, config: Dict[str, Any]) -> None:
         """Validate language variable configuration."""
         if config.get('type') != 'choice':
@@ -200,96 +305,7 @@ class SpringManifestLoader:
                 raise SpringManifestValidationError(
                     f"Invalid api_protocol choice '{choice}'. Must be one of: {self.VALID_API_PROTOCOLS}"
                 )
-    
-    def _validate_computed_variables(self, computed: Dict[str, Any]) -> None:
-        """Validate Spring Boot computed variables."""
-        required_computed = ['package_path', 'main_class_name', 'language_dir', 'file_extension']
-        
-        for var in required_computed:
-            if var not in computed:
-                raise SpringManifestValidationError(
-                    f"Missing required computed variable for Spring Boot: {var}"
-                )
-    
-    def _validate_spring_structure(self, structure: List[Dict[str, Any]]) -> None:
-        """
-        Validate Spring Boot specific structure definitions.
-        
-        Args:
-            structure: List of structure items
-            
-        Raises:
-            SpringManifestValidationError: If validation fails
-        """
-        if not isinstance(structure, list):
-            raise SpringManifestValidationError("Structure must be a list")
-        
-        # Check for required Spring Boot directories
-        required_paths = [
-            'src/main/{{ language_dir }}',
-            'src/main/resources',
-            'src/test/{{ language_dir }}'
-        ]
-        
-        structure_paths = [item.get('path', '') for item in structure]
-        
-        for required in required_paths:
-            # Check if any path contains the required path
-            found = any(required in path for path in structure_paths)
-            if not found:
-                raise SpringManifestValidationError(
-                    f"Spring Boot structure must include: {required}"
-                )
-        
-        for idx, item in enumerate(structure):
-            if not isinstance(item, dict):
-                raise SpringManifestValidationError(
-                    f"Structure item {idx} must be a dictionary"
-                )
-            
-            if 'path' not in item:
-                raise SpringManifestValidationError(
-                    f"Structure item {idx} missing required 'path' field"
-                )
-            
-            if 'type' not in item:
-                raise SpringManifestValidationError(
-                    f"Structure item {idx} missing required 'type' field"
-                )
-            
-            item_type = item['type']
-            if item_type not in ['dir', 'file']:
-                raise SpringManifestValidationError(
-                    f"Structure item {idx} has invalid type '{item_type}'"
-                )
-            
-            # Files must have a source
-            if item_type == 'file' and 'source' not in item:
-                raise SpringManifestValidationError(
-                    f"File structure item {idx} (path: {item['path']}) must have 'source' field"
-                )
-            
-            # Validate Spring Boot file patterns
-            path = item['path']
-            if item_type == 'file':
-                self._validate_spring_file_path(path, item.get('source', ''))
-    
-    def _validate_spring_file_path(self, path: str, source: str) -> None:
-        """Validate Spring Boot specific file paths."""
-        # Check for Application file
-        if 'Application.' in path:
-            if not ('{{ file_extension }}' in path or path.endswith('.java') or path.endswith('.kt')):
-                raise SpringManifestValidationError(
-                    f"Application file must use dynamic file extension: {path}"
-                )
-        
-        # Check for pom.xml or build.gradle
-        if 'pom.xml' in path or 'build.gradle' in path:
-            if not source:
-                raise SpringManifestValidationError(
-                    f"Build file must have a template source: {path}"
-                )
-    
+
     def validate_user_input(
         self, 
         manifest: Dict[str, Any], 
@@ -322,14 +338,14 @@ class SpringManifestLoader:
             
             # Spring Boot specific validations
             if var_name == 'package_name':
-                if not self._is_valid_java_package(value):
+                if not _is_valid_java_package(value):
                     errors.append(
                         f"Invalid Java package name: {value}. "
                         "Must be lowercase, dot-separated identifiers (e.g., com.example.app)"
                     )
             
             elif var_name == 'project_name':
-                if not self._is_valid_artifact_id(value):
+                if not _is_valid_artifact_id(value):
                     errors.append(
                         f"Invalid Maven artifact ID: {value}. "
                         "Must be lowercase, use hyphens (e.g., my-spring-app)"
@@ -364,13 +380,4 @@ class SpringManifestLoader:
                     )
         
         return errors
-    
-    def _is_valid_java_package(self, package: str) -> bool:
-        """Check if string is a valid Java package name."""
-        pattern = r'^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$'
-        return bool(re.match(pattern, package))
-    
-    def _is_valid_artifact_id(self, artifact_id: str) -> bool:
-        """Check if string is a valid Maven artifact ID."""
-        pattern = r'^[a-z][a-z0-9-]*$'
-        return bool(re.match(pattern, artifact_id))
+
