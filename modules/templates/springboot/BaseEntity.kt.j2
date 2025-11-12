@@ -1,0 +1,18 @@
+package {{ package_name }}.models
+
+import jakarta.persistence.*
+import lombok.*
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.ZonedDateTime
+
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener::class)
+open class BaseEntity(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    open var id: Long? = null,
+
+    open var isActive: Boolean? = true,
+    open var createdAt: ZonedDateTime? = null,
+    open var updatedAt: ZonedDateTime? = null
+)

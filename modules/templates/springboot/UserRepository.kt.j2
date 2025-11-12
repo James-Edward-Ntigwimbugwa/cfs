@@ -1,0 +1,13 @@
+package {{ package_name }}.repositories
+
+import {{ package_name }}.models.User
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
+
+/**
+ * Example JPA repository placeholder. Replace with other persistence layer of your choice.
+ */
+@Repository
+interface UserRepository : JpaRepository<User, Long> {
+    fun getAllUsers(): List<User>
+}

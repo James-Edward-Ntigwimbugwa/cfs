@@ -1,0 +1,16 @@
+package {{ package_name }}.models;
+import lombok.Data;
+import jakarta.persistence.Table;
+
+/**
+ * Simple user model to demonstrate package organization.
+ * Expand this with validation, annotations, persistence mapping, etc.
+ */
+@Data
+@Table(name = "users")
+public class User extends BaseModel {
+    private String username;
+    private String email;
+    private String firstName;
+    private String lastName;
+}

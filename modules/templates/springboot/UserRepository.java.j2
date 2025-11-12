@@ -1,0 +1,70 @@
+package {{ package_name }}.repository;
+
+import {{ package_name }}.model.User;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.stereotype.Repository;
+
+/**
+ * User Repository for {{ project_name }}
+ * 
+ * This is a simple in-memory repository implementation.
+ * Replace this with a proper Spring Data JPA repository when connecting to a database.
+ * 
+ * Example for JPA:
+ * public interface UserRepository extends JpaRepository<User, Long> {
+ *     Optional<User> findByUsername(String username);
+ * }
+ */
+
+ @Repository
+public class UserRepository {
+
+    private final ConcurrentHashMap<Long, User> users = new ConcurrentHashMap<>();
+    private final AtomicLong idGenerator = new AtomicLong(1);
+
+    public UserRepository() {
+        // Initialize with sample data
+        User user1 = new User( "johndoe", "john@example.com", "John", "Doe");
+        User user2 = new User( "janedoe", "jane@example.com", "Jane", "Doe");
+        users.put(user1.getId(), user1);
+        users.put(user2.getId(), user2);
+    }
+
+    /**
+     * Find all users
+     */
+    public List<User> findAll() {
+        return new ArrayList<>(users.values());
+    }
+
+    /**
+     * Find user by ID
+     */
+    public User findById(Long id) {
+        return users.get(id);
+    }
+
+    /**
+     * Save a user (create or update)
+     */
+    public User save(User user) {
+        if (user.getId() == null) {
+            user.setId(idGenerator.getAndIncrement());
+        }
+        users.put(user.getId(), user);
+        return user;
+    }
+
+    /**
+     * Delete a user
+     */
+    public void deleteById(Long id) {
+        users.remove(id);
+    }
+
+    // TODO: Replace with Spring Data JPA repository interface
+    // TODO: Add custom query methods (findByEmail, findByUsername, etc.)
+}

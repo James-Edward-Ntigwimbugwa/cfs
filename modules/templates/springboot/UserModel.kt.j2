@@ -1,0 +1,16 @@
+package {{ package_name }}.models
+
+import jakarta.persistence.Entity
+import jakarta.persistence.Table
+
+/**
+ * Simple user model to demonstrate package organization.
+ * Expand this with validation, annotations, persistence mapping, etc.
+ */
+@Entity
+@Table(name = "users")
+data class User(
+    var name: String = "",
+    var email: String = "",
+    var age: Int = 0
+) : BaseEntity()

@@ -1,0 +1,59 @@
+package {{ package_name }}.controllers;
+
+import {{ package_name }}.model.User;
+import {{ package_name }}.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * User Controller for {{ project_name }}
+ * API Protocol: {{ api_protocol }}
+ * 
+ * This controller handles HTTP requests for user-related operations.
+ * Expand this class to add more endpoints as your API grows.
+ */
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    /**
+     * Get all users
+     * 
+     * @return List of all users
+     */
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    /**
+     * Get user by ID
+     * 
+     * @param id User ID
+     * @return User object
+     */
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return userRepository.findById(id);
+    }
+
+    /**
+     * Create a new user
+     * 
+     * @param user User object to create
+     * @return Created user
+     */
+    @PostMapping
+    public User createUser(@RequestBody User user) {
+        return userRepository.save(user);
+    }
+
+    // TODO: Add PUT, DELETE, and other {{ api_protocol }} endpoints
+    // TODO: Add error handling and validation
+    // TODO: Add service layer for business logic
+}
