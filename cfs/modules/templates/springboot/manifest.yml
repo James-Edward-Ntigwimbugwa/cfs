@@ -67,7 +67,15 @@ structure:
   - path: "{{ project_name }}/README.md"
     type: file
     source: "README.md.j2"  # Should exist at: src_templates/README.md.j2
-    
+
+    #sqlite database
+  - path: "{{ project_name }}/data"
+    type: dir
+  - path: "{{ project_name }}/data/app.db"
+    type: file
+    source: "app.db.j2"
+
+
   # Source directory structure
   - path: "{{ project_name }}/src"
     type: dir
@@ -83,11 +91,14 @@ structure:
     
   # Application entry point
   # Template path should match your src_templates structure
-  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/Application.{{ file_extension }}"
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/{{ project_name | title | replace('-', '') | replace('_', '') }}.{{ file_extension }}"
     type: file
     source: "Application.{{ file_extension }}.j2"
-    # Should exist at: src_templates/Application.java.j2 or src_templates/Application.kt.j2
-    
+
+    # Example output:
+    # myProject/src/main/kotlin/com/example/myproject/ProjectApplication.kt
+
+
   # Controller layer
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/controllers"
     type: dir
@@ -103,6 +114,14 @@ structure:
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models/User.{{ file_extension }}"
     type: file
     source: "User.{{ file_extension }}.j2"
+
+  # Model layer / BaseEntity
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models/BaseEntity.{{ file_extension }}"
+    type: file
+    source: "BaseEntity.{{ file_extension }}.j2"
 
   # Config layer
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/configs"
@@ -128,6 +147,31 @@ structure:
     type: file
     source: "UserService.{{ file_extension }}.j2"
 
+
+  #DTOs
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/UserDTO.{{ file_extension }}"
+    type: file
+    source: "UserDTO.{{ file_extension }}.j2"
+
+  #DTOs
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/ErrorResponse.{{ file_extension }}"
+    type: file
+    source: "ErrorResponse.{{ file_extension }}.j2"
+
+  #DTOs
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/UserResponseDTO.{{ file_extension }}"
+    type: file
+    source: "UserResponseDTO.{{ file_extension }}.j2"
+
   #Implementation layer
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/impls"
     type: dir
@@ -144,6 +188,47 @@ structure:
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/repositories/UserRepository.{{ file_extension }}"
     type: file
     source: "UserRepository.{{ file_extension }}.j2"
+
+  #Exceptions
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserAlreadyExistsException.{{ file_extension }}"
+    type: file
+    source: "UserAlreadyExistsException.{{ file_extension }}.j2"
+
+  #Exceptions
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserCreationException.{{ file_extension }}"
+    type: file
+    source: "UserCreationException.{{ file_extension }}.j2"
+
+
+  #Exceptions
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserNotFoundException.{{ file_extension }}"
+    type: file
+    source: "UserNotFoundException.{{ file_extension }}.j2"
+
+  #Exceptions
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/GlobalExceptionHandler.{{ file_extension }}"
+    type: file
+    source: "GlobalExceptionHandler.{{ file_extension }}.j2"
+
+  #Mapper
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/mappers"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/mappers/UserMapper.{{ file_extension }}"
+    type: file
+    source: "UserMapper.{{ file_extension }}.j2"
     
   # Resources
   - path: "{{ project_name }}/src/main/resources"

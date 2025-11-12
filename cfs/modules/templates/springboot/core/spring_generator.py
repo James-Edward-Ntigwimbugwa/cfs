@@ -8,8 +8,6 @@ import subprocess
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
-import shutil
-
 
 class SpringGeneratorError(Exception):
     """Raised when Spring Boot generation fails."""

@@ -1,16 +1,31 @@
 package {{ package_name }}.models;
-import lombok.Data;
-import jakarta.persistence.Table;
 
-/**
- * Simple user model to demonstrate package organization.
- * Expand this with validation, annotations, persistence mapping, etc.
- */
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "username"),
+        @UniqueConstraint(columnNames = "email")
+})
 @Data
-@Table(name = "users")
-public class User extends BaseModel {
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class User extends BaseEntity {
+
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
+
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
+
+    @Column(name = "first_name", length = 50)
     private String firstName;
+
+    @Column(name = "last_name", length = 50)
     private String lastName;
 }

@@ -1,28 +1,121 @@
-package {{ package_name }}.impl;
-import {{ package_name }}.service.UserService;
-import {{ package_name }}.model.User;
-import org.springframework.stereotype.Service;
-import java.util.List;
+// ============= UserServiceImpl.java =============
 
-/**
- * Example repository placeholder. Replace with Spring Data JPA or other persistence layer.
- */
+package {{ package_name }}.impls;
+import {{ package_name }}.services.UserService;
+import {{ package_name }}.models.User;
+import {{package_name }}.dto.UserDTO;
+import {{package_name }}.dto.UserResponseDTO;
+import {{package_name }}.exceptions.UserAlreadyExistsException;
+import {{package_name }}.exceptions.UserCreationException;
+import {{package_name }}.exceptions.UserNotFoundException;
+import {{package_name }}.mappers.UserMapper;
+import {{package_name }}.repositories.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+@Transactional
 public class UserServiceImpl implements UserService {
-
-    // Implement user service methods here
 
     @Autowired
     private UserRepository userRepository;
 
-    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
-    public List<User> findAllUsers() {
-        // Placeholder implementation
-        logger.info("Fetching all users");
-        return userRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> findAllUsers() {
+        log.info("Fetching all users");
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDTO findById(Long id) {
+        log.info("Fetching user with id: {}", id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        return userMapper.toResponseDTO(user);
+    }
+
+    @Override
+    public UserResponseDTO createUser(UserDTO userDTO) {
+        log.info("Creating user with username: {}", userDTO.getUsername());
+
+        try {
+            // Check if username already exists
+            if (userRepository.existsByUsername(userDTO.getUsername())) {
+                throw new UserAlreadyExistsException("username", userDTO.getUsername());
+            }
+
+            // Check if email already exists
+            if (userRepository.existsByEmail(userDTO.getEmail())) {
+                throw new UserAlreadyExistsException("email", userDTO.getEmail());
+            }
+
+            User user = userMapper.toEntity(userDTO);
+            User savedUser = userRepository.save(user);
+
+            log.info("User created successfully with id: {}", savedUser.getId());
+            return userMapper.toResponseDTO(savedUser);
+
+        } catch (UserAlreadyExistsException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to create user: {}", e.getMessage(), e);
+            throw new UserCreationException("Failed to create user: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public UserResponseDTO updateUser(Long id, UserDTO userDTO) {
+        log.info("Updating user with id: {}", id);
+
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        // Check if username is being changed and if new username already exists
+        if (!existingUser.getUsername().equals(userDTO.getUsername()) &&
+                userRepository.existsByUsername(userDTO.getUsername())) {
+            throw new UserAlreadyExistsException("username", userDTO.getUsername());
+        }
+
+        // Check if email is being changed and if new email already exists
+        if (!existingUser.getEmail().equals(userDTO.getEmail()) &&
+                userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new UserAlreadyExistsException("email", userDTO.getEmail());
+        }
+
+        existingUser.setUsername(userDTO.getUsername());
+        existingUser.setEmail(userDTO.getEmail());
+        existingUser.setFirstName(userDTO.getFirstName());
+        existingUser.setLastName(userDTO.getLastName());
+
+        User updatedUser = userRepository.save(existingUser);
+        log.info("User updated successfully with id: {}", updatedUser.getId());
+
+        return userMapper.toResponseDTO(updatedUser);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        log.info("Deleting user with id: {}", id);
+
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
+
+        userRepository.deleteById(id);
+        log.info("User deleted successfully with id: {}", id);
+    }
 }
