@@ -1,0 +1,27 @@
+// ============= BaseEntity.kt =============
+package {{ package_name }}.models
+
+import jakarta.persistence.*
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.ZonedDateTime
+
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener::class)
+abstract class BaseEntity(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null,
+
+    @Column(name = "is_active")
+    var isActive: Boolean = true,
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    var createdAt: ZonedDateTime? = null,
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    var updatedAt: ZonedDateTime? = null
+)

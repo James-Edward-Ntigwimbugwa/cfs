@@ -1,0 +1,8 @@
+
+// ============= UserNotFoundException.kt =============
+package {{ package_name }}.exceptions
+
+class UserNotFoundException : RuntimeException {
+    constructor(id: Long) : super("User not found with id: $id")
+    constructor(message: String) : super(message)
+}

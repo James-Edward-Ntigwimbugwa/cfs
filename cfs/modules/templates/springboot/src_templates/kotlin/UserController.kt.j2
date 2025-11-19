@@ -1,0 +1,94 @@
+
+
+// ============= UserController.kt =============
+package {{ package_name }}.controllers
+
+import {{ package_name }}.dtos.UserDTO
+import {{ package_name }}.dtos.UserResponseDTO
+import {{ package_name }}.services.UserService
+import jakarta.validation.Valid
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+
+/**
+ * User Controller for demoapp
+ * API Protocol: rest
+ *
+ * This controller handles HTTP requests for user-related operations.
+ */
+@RestController
+@RequestMapping("/api/users")
+class UserController(private val service: UserService) {
+
+    private val log = LoggerFactory.getLogger(UserController::class.java)
+
+    /**
+     * Get all users
+     *
+     * @return List of all users
+     */
+    @GetMapping
+    fun getAllUsers(): ResponseEntity<List<UserResponseDTO>> {
+        log.info("GET /api/users - Fetching all users")
+        val users = service.findAllUsers()
+        return ResponseEntity.ok(users)
+    }
+
+    /**
+     * Get user by ID
+     *
+     * @param id User ID
+     * @return User object
+     */
+    @GetMapping("/{id}")
+    fun getUserById(@PathVariable id: Long): ResponseEntity<UserResponseDTO> {
+        log.info("GET /api/users/$id - Fetching user by id")
+        val user = service.findById(id)
+        return ResponseEntity.ok(user)
+    }
+
+    /**
+     * Create a new user
+     *
+     * @param userDTO User data transfer object
+     * @return Created user
+     */
+    @PostMapping
+    fun createUser(@Valid @RequestBody userDTO: UserDTO): ResponseEntity<UserResponseDTO> {
+        log.info("POST /api/users - Creating new user: ${userDTO.username}")
+        val createdUser = service.createUser(userDTO)
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser)
+    }
+
+    /**
+     * Update an existing user
+     *
+     * @param id User ID
+     * @param userDTO User data transfer object
+     * @return Updated user
+     */
+    @PutMapping("/{id}")
+    fun updateUser(
+        @PathVariable id: Long,
+        @Valid @RequestBody userDTO: UserDTO
+    ): ResponseEntity<UserResponseDTO> {
+        log.info("PUT /api/users/$id - Updating user")
+        val updatedUser = service.updateUser(id, userDTO)
+        return ResponseEntity.ok(updatedUser)
+    }
+
+    /**
+     * Delete a user
+     *
+     * @param id User ID
+     * @return No content
+     */
+    @DeleteMapping("/{id}")
+    fun deleteUser(@PathVariable id: Long): ResponseEntity<Void> {
+        log.info("DELETE /api/users/$id - Deleting user")
+        service.deleteUser(id)
+        return ResponseEntity.noContent().build()
+    }
+}

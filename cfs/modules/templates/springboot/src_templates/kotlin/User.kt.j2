@@ -1,0 +1,26 @@
+// ============= User.kt =============
+package {{ package_name }}.models
+
+import jakarta.persistence.*
+
+@Entity
+@Table(
+    name = "users",
+    uniqueConstraints = [
+        UniqueConstraint(columnNames = ["username"]),
+        UniqueConstraint(columnNames = ["email"])
+    ]
+)
+class User(
+    @Column(nullable = false, unique = true, length = 50)
+    var username: String = "",
+
+    @Column(nullable = false, unique = true, length = 100)
+    var email: String = "",
+
+    @Column(name = "first_name", length = 50)
+    var firstName: String? = null,
+
+    @Column(name = "last_name", length = 50)
+    var lastName: String? = null
+) : BaseEntity()

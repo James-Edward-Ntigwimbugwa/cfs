@@ -1,0 +1,20 @@
+// ============= UserRepository.kt =============
+package {{ package_name }}.repositories
+
+import {{ package_name }}.models.User
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
+import java.util.*
+
+/**
+ * User Repository for demoapp
+ *
+ * This is a Spring Data JPA repository implementation.
+ */
+@Repository
+interface UserRepository : JpaRepository<User, Long> {
+    fun findByUsername(username: String): Optional<User>
+    fun findByEmail(email: String): Optional<User>
+    fun existsByUsername(username: String): Boolean
+    fun existsByEmail(email: String): Boolean
+}

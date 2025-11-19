@@ -1,0 +1,4 @@
+package {{package_name}}.exceptions
+
+class UserAlreadyExistsException(field: String, value: String) :
+    RuntimeException("User already exists with $field: $value")

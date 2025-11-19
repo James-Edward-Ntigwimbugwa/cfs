@@ -1,0 +1,136 @@
+
+// ============= GlobalExceptionHandler.kt =============
+package {{ package_name }}.exceptions
+
+import {{ package_name }}.dtos.ErrorResponse
+import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.LoggerFactory
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.validation.FieldError
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
+
+@RestControllerAdvice
+class GlobalExceptionHandler {
+
+    private val log = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handleUserNotFoundException(
+        ex: UserNotFoundException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        log.error("User not found: ${ex.message}")
+
+        val error = ErrorResponse(
+            status = HttpStatus.NOT_FOUND.value(),
+            error = "Not Found",
+            message = ex.message ?: "User not found",
+            path = request.requestURI
+        )
+
+        return ResponseEntity(error, HttpStatus.NOT_FOUND)
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException::class)
+    fun handleUserAlreadyExistsException(
+        ex: UserAlreadyExistsException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        log.error("User already exists: ${ex.message}")
+
+        val error = ErrorResponse(
+            status = HttpStatus.CONFLICT.value(),
+            error = "Conflict",
+            message = ex.message ?: "User already exists",
+            path = request.requestURI
+        )
+
+        return ResponseEntity(error, HttpStatus.CONFLICT)
+    }
+
+    @ExceptionHandler(UserCreationException::class)
+    fun handleUserCreationException(
+        ex: UserCreationException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        log.error("User creation failed: ${ex.message}", ex)
+
+        val error = ErrorResponse(
+            status = HttpStatus.BAD_REQUEST.value(),
+            error = "Bad Request",
+            message = ex.message ?: "User creation failed",
+            path = request.requestURI
+        )
+
+        return ResponseEntity(error, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleValidationExceptions(
+        ex: MethodArgumentNotValidException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        log.error("Validation failed: ${ex.message}")
+
+        val validationErrors = ex.bindingResult.allErrors.associate { error ->
+            val fieldName = (error as FieldError).field
+            val errorMessage = error.defaultMessage ?: "Validation error"
+            fieldName to errorMessage
+        }
+
+        val error = ErrorResponse(
+            status = HttpStatus.BAD_REQUEST.value(),
+            error = "Validation Failed",
+            message = "Invalid input parameters",
+            path = request.requestURI
+        ).apply {
+            this.validationErrors = validationErrors
+        }
+
+        return ResponseEntity(error, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException::class)
+    fun handleDataIntegrityViolation(
+        ex: DataIntegrityViolationException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        log.error("Data integrity violation: ${ex.message}")
+
+        val message = when {
+            ex.message?.contains("username") == true -> "Username already exists"
+            ex.message?.contains("email") == true -> "Email already exists"
+            else -> "Database constraint violation. Please check your input data."
+        }
+
+        val error = ErrorResponse(
+            status = HttpStatus.CONFLICT.value(),
+            error = "Conflict",
+            message = message,
+            path = request.requestURI
+        )
+
+        return ResponseEntity(error, HttpStatus.CONFLICT)
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleGenericException(
+        ex: Exception,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        log.error("Unexpected error occurred: ${ex.message}", ex)
+
+        val error = ErrorResponse(
+            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            error = "Internal Server Error",
+            message = "An unexpected error occurred. Please try again later.",
+            path = request.requestURI
+        )
+
+        return ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+}

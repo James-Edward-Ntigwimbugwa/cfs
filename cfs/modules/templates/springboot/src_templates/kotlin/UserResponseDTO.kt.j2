@@ -1,0 +1,15 @@
+// ============= UserResponseDTO.kt =============
+package {{ package_name }}.dtos
+
+import java.time.ZonedDateTime
+
+data class UserResponseDTO(
+    val id: Long?,
+    val username: String,
+    val email: String,
+    val firstName: String?,
+    val lastName: String?,
+    val isActive: Boolean,
+    val createdAt: ZonedDateTime?,
+    val updatedAt: ZonedDateTime?
+)

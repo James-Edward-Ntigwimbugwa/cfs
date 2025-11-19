@@ -1,0 +1,35 @@
+// ============= UserMapper.kt =============
+package {{ package_name }}.mappers
+
+import {{ package_name }}.dtos.UserDTO
+import {{ package_name }}.dtos.UserResponseDTO
+import {{ package_name }}.models.User
+import org.springframework.stereotype.Component
+
+@Component
+class UserMapper {
+
+    fun toEntity(dto: UserDTO): User {
+        return User(
+            username = dto.username,
+            email = dto.email,
+            firstName = dto.firstName,
+            lastName = dto.lastName
+        ).apply {
+            isActive = true
+        }
+    }
+
+    fun toResponseDTO(user: User): UserResponseDTO {
+        return UserResponseDTO(
+            id = user.id,
+            username = user.username,
+            email = user.email,
+            firstName = user.firstName,
+            lastName = user.lastName,
+            isActive = user.isActive,
+            createdAt = user.createdAt,
+            updatedAt = user.updatedAt
+        )
+    }
+}

@@ -1,0 +1,113 @@
+
+
+// ============= UserServiceImpl.kt =============
+package {{ package_name }}.impls
+
+import {{ package_name }}.dtos.UserDTO
+import {{ package_name }}.dtos.UserResponseDTO
+import {{ package_name }}.exceptions.UserAlreadyExistsException
+import {{ package_name }}.exceptions.UserCreationException
+import {{ package_name }}.exceptions.UserNotFoundException
+import {{ package_name }}.mappers.UserMapper
+import {{ package_name }}.repositories.UserRepository
+import {{ package_name }}.services.UserService
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+@Transactional
+class UserServiceImpl(
+    private val userRepository: UserRepository,
+    private val userMapper: UserMapper
+) : UserService {
+
+    private val log = LoggerFactory.getLogger(UserServiceImpl::class.java)
+
+    @Transactional(readOnly = true)
+    override fun findAllUsers(): List<UserResponseDTO> {
+        log.info("Fetching all users")
+        return userRepository.findAll()
+            .map { userMapper.toResponseDTO(it) }
+    }
+
+    @Transactional(readOnly = true)
+    override fun findById(id: Long): UserResponseDTO {
+        log.info("Fetching user with id: $id")
+        val user = userRepository.findById(id)
+            .orElseThrow { UserNotFoundException(id) }
+        return userMapper.toResponseDTO(user)
+    }
+
+    override fun createUser(userDTO: UserDTO): UserResponseDTO {
+        log.info("Creating user with username: ${userDTO.username}")
+
+        try {
+            // Check if username already exists
+            if (userRepository.existsByUsername(userDTO.username)) {
+                throw UserAlreadyExistsException("username", userDTO.username)
+            }
+
+            // Check if email already exists
+            if (userRepository.existsByEmail(userDTO.email)) {
+                throw UserAlreadyExistsException("email", userDTO.email)
+            }
+
+            val user = userMapper.toEntity(userDTO)
+            val savedUser = userRepository.save(user)
+
+            log.info("User created successfully with id: ${savedUser.id}")
+            return userMapper.toResponseDTO(savedUser)
+
+        } catch (e: UserAlreadyExistsException) {
+            throw e
+        } catch (e: Exception) {
+            log.error("Failed to create user: ${e.message}", e)
+            throw UserCreationException("Failed to create user: ${e.message}", e)
+        }
+    }
+
+    override fun updateUser(id: Long, userDTO: UserDTO): UserResponseDTO {
+        log.info("Updating user with id: $id")
+
+        val existingUser = userRepository.findById(id)
+            .orElseThrow { UserNotFoundException(id) }
+
+        // Check if username is being changed and if new username already exists
+        if (existingUser.username != userDTO.username &&
+            userRepository.existsByUsername(userDTO.username)
+        ) {
+            throw UserAlreadyExistsException("username", userDTO.username)
+        }
+
+        // Check if email is being changed and if new email already exists
+        if (existingUser.email != userDTO.email &&
+            userRepository.existsByEmail(userDTO.email)
+        ) {
+            throw UserAlreadyExistsException("email", userDTO.email)
+        }
+
+        existingUser.apply {
+            username = userDTO.username
+            email = userDTO.email
+            firstName = userDTO.firstName
+            lastName = userDTO.lastName
+        }
+
+        val updatedUser = userRepository.save(existingUser)
+        log.info("User updated successfully with id: ${updatedUser.id}")
+
+        return userMapper.toResponseDTO(updatedUser)
+    }
+
+    override fun deleteUser(id: Long) {
+        log.info("Deleting user with id: $id")
+
+        if (!userRepository.existsById(id)) {
+            throw UserNotFoundException(id)
+        }
+
+        userRepository.deleteById(id)
+        log.info("User deleted successfully with id: $id")
+    }
+}

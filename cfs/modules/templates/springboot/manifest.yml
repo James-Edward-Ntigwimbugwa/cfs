@@ -93,7 +93,7 @@ structure:
   # Template path should match your src_templates structure
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/{{ project_name | title | replace('-', '') | replace('_', '') }}.{{ file_extension }}"
     type: file
-    source: "Application.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/Application.{{ file_extension }}.j2"
 
     # Example output:
     # myProject/src/main/kotlin/com/example/myproject/ProjectApplication.kt
@@ -105,7 +105,7 @@ structure:
     
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/controllers/UserController.{{ file_extension }}"
     type: file
-    source: "UserController.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserController.{{ file_extension }}.j2"
     
   # Model layer
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models"
@@ -113,7 +113,7 @@ structure:
     
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models/User.{{ file_extension }}"
     type: file
-    source: "User.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/User.{{ file_extension }}.j2"
 
   # Model layer / BaseEntity
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models"
@@ -121,7 +121,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models/BaseEntity.{{ file_extension }}"
     type: file
-    source: "BaseEntity.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/BaseEntity.{{ file_extension }}.j2"
 
   # Config layer
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/configs"
@@ -137,7 +137,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/enums/UserRolesEnum.{{file_extension}}"
     type: file
-    source: "UserRolesEnum.{{file_extension}}.j2"
+    source: "{{ language_dir }}/UserRolesEnum.{{file_extension}}.j2"
 
   #Service layer
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/services"
@@ -145,7 +145,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/services/UserService.{{ file_extension }}"
     type: file
-    source: "UserService.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserService.{{ file_extension }}.j2"
 
 
   #DTOs
@@ -154,7 +154,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/UserDTO.{{ file_extension }}"
     type: file
-    source: "UserDTO.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserDTO.{{ file_extension }}.j2"
 
   #DTOs
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos"
@@ -162,7 +162,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/ErrorResponse.{{ file_extension }}"
     type: file
-    source: "ErrorResponse.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/ErrorResponse.{{ file_extension }}.j2"
 
   #DTOs
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos"
@@ -170,7 +170,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/UserResponseDTO.{{ file_extension }}"
     type: file
-    source: "UserResponseDTO.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserResponseDTO.{{ file_extension }}.j2"
 
   #Implementation layer
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/impls"
@@ -178,7 +178,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/impls/UserServiceImpl.{{ file_extension }}"
     type: file
-    source: "UserServiceImpl.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserServiceImpl.{{ file_extension }}.j2"
 
     
   # Repository layer
@@ -187,7 +187,7 @@ structure:
     
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/repositories/UserRepository.{{ file_extension }}"
     type: file
-    source: "UserRepository.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserRepository.{{ file_extension }}.j2"
 
   #Exceptions
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
@@ -195,7 +195,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserAlreadyExistsException.{{ file_extension }}"
     type: file
-    source: "UserAlreadyExistsException.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserAlreadyExistsException.{{ file_extension }}.j2"
 
   #Exceptions
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
@@ -203,7 +203,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserCreationException.{{ file_extension }}"
     type: file
-    source: "UserCreationException.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserCreationException.{{ file_extension }}.j2"
 
 
   #Exceptions
@@ -212,7 +212,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserNotFoundException.{{ file_extension }}"
     type: file
-    source: "UserNotFoundException.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserNotFoundException.{{ file_extension }}.j2"
 
   #Exceptions
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
@@ -220,7 +220,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/GlobalExceptionHandler.{{ file_extension }}"
     type: file
-    source: "GlobalExceptionHandler.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/GlobalExceptionHandler.{{ file_extension }}.j2"
 
   #Mapper
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/mappers"
@@ -228,7 +228,7 @@ structure:
 
   - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/mappers/UserMapper.{{ file_extension }}"
     type: file
-    source: "UserMapper.{{ file_extension }}.j2"
+    source: "{{ language_dir }}/UserMapper.{{ file_extension }}.j2"
     
   # Resources
   - path: "{{ project_name }}/src/main/resources"
