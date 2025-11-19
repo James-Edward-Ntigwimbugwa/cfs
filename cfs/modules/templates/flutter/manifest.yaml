@@ -1,0 +1,31 @@
+# Flutter Template Manifest
+
+name: flutter
+description: Flutter Application template with support for REST, GraphQL, and WebSocket APIs
+version: 1.0.0
+
+# Variables define the inputs users provide when scaffolding
+variables:
+  project_name:
+    type: string
+    prompt: "Project name (used for artifact ID and directory name)"
+    default: "spring-app"
+    validation: "^[a-z][a-z0-9-]*$"
+    
+    
+  api_protocol:
+    type: choice
+    prompt: "API protocol type"
+    choices: ["rest", "graphql", "websocket"]
+    default: "rest"
+
+
+# Computed variables (derived from user inputs)
+computed:
+  package_path: "{{ package_name.replace('.', '/') }}"
+  main_class_name: "{{ project_name.replace('-', ' ').title().replace(' ', '') }}Application"
+  language_dir: "{{ 'kotlin' if language == 'kt' else 'java' }}"
+  file_extension: "{{ 'kt' if language == 'kt' else 'java' }}"
+
+# Files source directory containing Jinja2 templates
+files_source: "src_templates"

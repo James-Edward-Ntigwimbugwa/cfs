@@ -8,14 +8,12 @@ import click
 import sys
 from pathlib import Path
 from typing import Tuple, Type, Any
-from cfs.modules.templates.springboot.core.spring_generator import SpringGenerator
-from cfs.modules.templates.springboot.core.spring_manifest_loader import SpringManifestLoader
 
 
 def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
     """
     Get framework-specific generator and manifest loader classes.
-    Uses match/case for framework selection (Python 3.10+).
+    Uses match/case for framework selection .
 
     Args:
         template_name: Name of the framework template
@@ -29,17 +27,19 @@ def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
     match template_name:
         case 'springboot':
             try:
+                from cfs.modules.templates.springboot.core.spring_generator import SpringGenerator
+                from cfs.modules.templates.springboot.core.spring_manifest_loader import SpringManifestLoader
                 return SpringGenerator, SpringManifestLoader
             except ImportError as e:
                 raise ImportError(f"Failed to load Spring Boot modules: {e}")
 
-        # case 'flutter':
-        #     try:
-        #         from modules.templates.flutter.core.flutter_generator import FlutterGenerator
-        #         from modules.templates.flutter.core.flutter_manifest_loader import FlutterManifestLoader
-        #         return FlutterGenerator, FlutterManifestLoader
-        #     except ImportError as e:
-        #         raise ImportError(f"Failed to load Flutter modules: {e}")
+        case 'flutter':
+            try:
+                from cfs.modules.templates.flutter.core.flutter_generator import FlutterGenerator
+                from cfs.modules.templates.flutter.core.flutter_manifest_loader import FlutterManifestLoader
+                return FlutterManifestLoader, FlutterGenerator
+            except ImportError as e:
+                raise ImportError(f"Failed to load Flutter modules: {e}")
 
         # case 'react':
         #     try:
@@ -160,8 +160,11 @@ def init(template_name, project_name, package_name, language, api_protocol,
     base_dir = Path(__file__).resolve().parent
     template_path = (base_dir / 'modules' / 'templates' / template_name).resolve()
 
+    RED = "\033[91m"
+    RESET = "\033[0m"
+
     if not template_path.exists():
-        click.echo(f"❌ Template '{template_name}' not found.", err=True)
+        click.echo(f"{RED}Template '{template_name}' not found.{RESET}", err=True)
         list_available_templates()
         sys.exit(1)
 
@@ -169,7 +172,7 @@ def init(template_name, project_name, package_name, language, api_protocol,
     try:
         GeneratorClass, ManifestLoaderClass = get_framework_modules(template_name)
     except ImportError as e:
-        click.echo(f"❌ {e}", err=True)
+        click.echo(f"{RED}{e}{RESET}", err=True)
         if debug:
             raise
         sys.exit(1)
@@ -183,9 +186,10 @@ def init(template_name, project_name, package_name, language, api_protocol,
         if debug:
             click.echo(f"✓ Loaded {template_name} manifest", err=True)
     except Exception as e:
-        click.echo(f"❌ Error loading manifest: {e}", err=True)
+        click.echo(f"{RED}Error loading manifest: {e}{RESET}", err=True)
         if debug:
             raise
+
         sys.exit(1)
 
     # Collect variables (from options or prompt)
