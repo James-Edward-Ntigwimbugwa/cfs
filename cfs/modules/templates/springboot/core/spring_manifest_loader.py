@@ -8,10 +8,7 @@ import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-
-class SpringManifestValidationError(Exception):
-    """Raised when Spring Boot manifest validation fails."""
-    pass
+from cfs.modules.templates.springboot.core.exceptions.spring_manifest_validation_error import SpringManifestValidationError
 
 
 def _validate_computed_variables(computed: Dict[str, Any]) -> None:

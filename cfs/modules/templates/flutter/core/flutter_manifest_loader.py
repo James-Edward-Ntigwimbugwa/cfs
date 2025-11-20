@@ -10,6 +10,45 @@ from typing import Dict, Any, List
 
 from cfs.modules.templates.flutter.core.exceptions.flutter_manifest_validation_error import FlutterManifestValidationError
 
+def _validate_computed_variables(computed: Dict[str, Any]) -> None:
+    """Validate Flutter computed variables."""
+    required_computed = ['package_path']
+
+    for var in required_computed:
+        if var not in computed:
+            raise FlutterManifestValidationError(
+                f"Missing required computed variable for Flutter: {var}"
+            )
+
+
+def _is_valid_flutter_project_name(project_name: str) -> bool:
+    """Check if string is a valid Flutter project name."""
+    # Flutter project names must be lowercase, use underscores, start with letter
+    pattern = r'^[a-z][a-z0-9_]*$'
+    return bool(re.match(pattern, project_name))
+
+
+def _is_valid_package_name(package_name: str) -> bool:
+    """Check if string is a valid package name (reverse domain notation)."""
+    pattern = r'^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)*$'
+    return bool(re.match(pattern, package_name))
+
+
+def _validate_package_name_config(var_name: str, config: Dict[str, Any]) -> None:
+    """Validate package_name variable configuration."""
+    validation = config.get('validation')
+    if not validation:
+        raise FlutterManifestValidationError(
+            "package_name must have validation regex for package format"
+        )
+
+    # Check that validation allows package format
+    test_package = "com.example.app"
+    if not re.match(validation, test_package):
+        raise FlutterManifestValidationError(
+            f"package_name validation regex must accept valid packages like '{test_package}'"
+        )
+
 
 class FlutterManifestLoader:
     """Loads and validates Flutter template manifests."""
@@ -25,9 +64,9 @@ class FlutterManifestLoader:
             template_path: Path to the Flutter template directory
         """
         self.template_path = Path(template_path)
-        self.manifest_path = self.template_path / "manifest.yaml"
+        self.manifest_path = self.template_path / "manifest.yml"
         
-    def load_manifest(self) -> Dict[str, Any]:
+    def load(self) -> Dict[str, Any]:
         """
         Load and parse the Flutter manifest file.
         
@@ -80,7 +119,7 @@ class FlutterManifestLoader:
         
         # Validate computed variables
         if 'computed' in manifest:
-            FlutterManifestValidationError.validate_computed_variables(manifest['computed'])
+            _validate_computed_variables(manifest['computed'])
     
     def _validate_flutter_variables(self, variables: Dict[str, Any]) -> None:
         """
@@ -108,7 +147,7 @@ class FlutterManifestLoader:
             
             # Validate Flutter specific variables
             if var_name == 'package_name':
-                FlutterManifestValidationError.validate_package_name_config(var_name, var_config)
+                _validate_package_name_config(var_name, var_config)
             elif var_name == 'project_name':
                 self._validate_project_name_config(var_name, var_config)
             elif var_name == 'api_protocol':
@@ -195,14 +234,14 @@ class FlutterManifestLoader:
             
             # Flutter specific validations
             if var_name == 'package_name':
-                if not FlutterManifestValidationError.is_valid_package_name(value):
+                if not _is_valid_package_name(value):
                     errors.append(
                         f"Invalid package name: {value}. "
                         "Must be lowercase, dot-separated identifiers (e.g., com.example.app)"
                     )
             
             elif var_name == 'project_name':
-                if not FlutterManifestValidationError.is_valid_flutter_project_name(value):
+                if not _is_valid_flutter_project_name(value):
                     errors.append(
                         f"Invalid Flutter project name: {value}. "
                         "Must be lowercase, use underscores, start with a letter (e.g., my_flutter_app)"

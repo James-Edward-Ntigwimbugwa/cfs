@@ -9,9 +9,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
-class SpringGeneratorError(Exception):
-    """Raised when Spring Boot generation fails."""
-    pass
+from cfs.modules.templates.springboot.core.exceptions.spring_generator_error import SpringGeneratorError
 
 
 class SpringGenerator:
