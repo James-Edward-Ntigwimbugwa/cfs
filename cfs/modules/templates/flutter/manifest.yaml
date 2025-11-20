@@ -1,17 +1,23 @@
 # Flutter Template Manifest
+# This file defines the template structure, variables, and hooks for the cfs generator
 
 name: flutter
-description: Flutter Application template with support for REST, GraphQL, and WebSocket APIs
+description: Flutter application template with support for REST, GraphQL, and WebSocket APIs
 version: 1.0.0
 
 # Variables define the inputs users provide when scaffolding
 variables:
   project_name:
     type: string
-    prompt: "Project name (used for artifact ID and directory name)"
-    default: "spring-app"
-    validation: "^[a-z][a-z0-9-]*$"
+    prompt: "Project name (used for app name and directory name)"
+    default: "flutter_app"
+    validation: "^[a-z][a-z0-9_]*$"
     
+  package_name:
+    type: string
+    prompt: "Package name (used for application ID, e.g., com.example.app)"
+    default: "com.example.app"
+    validation: "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$"
     
   api_protocol:
     type: choice
@@ -19,13 +25,28 @@ variables:
     choices: ["rest", "graphql", "websocket"]
     default: "rest"
 
-
 # Computed variables (derived from user inputs)
 computed:
   package_path: "{{ package_name.replace('.', '/') }}"
-  main_class_name: "{{ project_name.replace('-', ' ').title().replace(' ', '') }}Application"
-  language_dir: "{{ 'kotlin' if language == 'kt' else 'java' }}"
-  file_extension: "{{ 'kt' if language == 'kt' else 'java' }}"
+  reversed_domain: "{{ '.'.join(package_name.split('.')[::-1]) }}"
 
 # Files source directory containing Jinja2 templates
 files_source: "src_templates"
+
+# Structure defines the directory and file layout of the generated project
+# Note: For Flutter, the main structure is created by `flutter create` command
+# This section will be used for additional custom files/directories
+structure:
+  # Root project directory (created by flutter create)
+  - path: "{{ project_name }}"
+    type: dir
+
+# Hooks execute shell scripts at specific points in the generation lifecycle
+hooks:
+  pre_gen:
+    script: "scripts/pre_gen.sh"
+    description: "Creates Flutter project using flutter create command"
+    
+  post_gen:
+    script: "scripts/post_gen.sh"
+    description: "Installs basic Flutter packages and sets up project dependencies"

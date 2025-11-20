@@ -37,7 +37,7 @@ def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
             try:
                 from cfs.modules.templates.flutter.core.flutter_generator import FlutterGenerator
                 from cfs.modules.templates.flutter.core.flutter_manifest_loader import FlutterManifestLoader
-                return FlutterManifestLoader, FlutterGenerator
+                return FlutterGenerator,FlutterManifestLoader
             except ImportError as e:
                 raise ImportError(f"Failed to load Flutter modules: {e}")
 
