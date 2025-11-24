@@ -2,51 +2,253 @@
 # This file defines the template structure, variables, and hooks for the cfs generator
 
 name: flutter
-description: Flutter application template with support for REST, GraphQL, and WebSocket APIs
+description: Flutter application template with modular architecture and GraphQL support using go_router
 version: 1.0.0
 
 # Variables define the inputs users provide when scaffolding
 variables:
   project_name:
     type: string
-    prompt: "Project name (used for app name and directory name)"
+    prompt: "Project name (flutter project directory name)"
     default: "flutter_app"
     validation: "^[a-z][a-z0-9_]*$"
-    
+
   package_name:
     type: string
-    prompt: "Package name (used for application ID, e.g., com.example.app)"
+    prompt: "Package name/Organization (e.g., com.example.app)"
     default: "com.example.app"
     validation: "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$"
-    
+
   api_protocol:
     type: choice
     prompt: "API protocol type"
     choices: ["rest", "graphql", "websocket"]
-    default: "rest"
+    default: "graphql"
 
 # Computed variables (derived from user inputs)
 computed:
-  package_path: "{{ package_name.replace('.', '/') }}"
-  reversed_domain: "{{ '.'.join(package_name.split('.')[::-1]) }}"
+  org_identifier: "{{ package_name.rsplit('.', 1)[0] if '.' in package_name else 'com.example' }}"
+  app_name: "{{ project_name.replace('_', ' ').title() }}"
 
 # Files source directory containing Jinja2 templates
 files_source: "src_templates"
 
-# Structure defines the directory and file layout of the generated project
-# Note: For Flutter, the main structure is created by `flutter create` command
-# This section will be used for additional custom files/directories
+# Structure defines the directory and file layout
+# Note: Flutter base project is created by 'flutter create' in pre_gen hook
+# This structure defines additional files/directories we add after creation
 structure:
-  # Root project directory (created by flutter create)
-  - path: "{{ project_name }}"
+  # Root lib directory (already exists from flutter create)
+  - path: "{{ project_name }}/lib"
     type: dir
+
+  # Core module (shared infrastructure)
+  - path: "{{ project_name }}/lib/core"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/api_config"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/api_config/graphql_config.dart"
+    type: file
+    source: "lib/core/api_config/graphql_config.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/constants"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/constants/api_constants.dart"
+    type: file
+    source: "lib/core/constants/api_constants.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/theme"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/theme/app_theme.dart"
+    type: file
+    source: "lib/core/theme/app_theme.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/theme/color.dart"
+    type: file
+    source: "lib/core/theme/color.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/gen"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/gen/.gitkeep"
+    type: file
+    source: ".gitkeep.j2"
+
+  # Modules directory (feature modules)
+  - path: "{{ project_name }}/lib/modules"
+    type: dir
+
+  # User module (default demo module with GraphQL CRUD)
+  - path: "{{ project_name }}/lib/modules/users"
+    type: dir
+
+  # Users data layer
+  - path: "{{ project_name }}/lib/modules/users/data"
+    type: dir
+
+  # Users data - models
+  - path: "{{ project_name }}/lib/modules/users/data/models"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/users/data/models/user_model.dart"
+    type: file
+    source: "lib/modules/users/data/models/user_model.dart.j2"
+
+  # Users data - services
+  - path: "{{ project_name }}/lib/modules/users/data/services"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/users/data/services/user_service.dart"
+    type: file
+    source: "lib/modules/users/data/services/user_service.dart.j2"
+
+  # Users data - graphql
+  - path: "{{ project_name }}/lib/modules/users/data/graphql"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/users/data/graphql/mutations.dart"
+    type: file
+    source: "lib/modules/users/data/graphql/mutations.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/users/data/graphql/queries.dart"
+    type: file
+    source: "lib/modules/users/data/graphql/queries.dart.j2"
+
+  # Users data - repositories
+  - path: "{{ project_name }}/lib/modules/users/data/repositories"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/users/data/repositories/user_repository.dart"
+    type: file
+    source: "lib/modules/users/data/repositories/user_repository.dart.j2"
+
+  # Users presentation layer
+  - path: "{{ project_name }}/lib/modules/users/presentation"
+    type: dir
+
+  # Users presentation - providers
+  - path: "{{ project_name }}/lib/modules/users/presentation/providers"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/users/presentation/providers/user_provider.dart"
+    type: file
+    source: "lib/modules/users/presentation/providers/user_provider.dart.j2"
+
+  # Users presentation - screens
+  - path: "{{ project_name }}/lib/modules/users/presentation/screens"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/users/presentation/screens/user_list_screen.dart"
+    type: file
+    source: "lib/modules/users/presentation/screens/user_list_screen.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/users/presentation/screens/user_detail_screen.dart"
+    type: file
+    source: "lib/modules/users/presentation/screens/user_detail_screen.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/users/presentation/screens/user_create_screen.dart"
+    type: file
+    source: "lib/modules/users/presentation/screens/user_create_screen.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/users/presentation/screens/user_edit_screen.dart"
+    type: file
+    source: "lib/modules/users/presentation/screens/user_edit_screen.dart.j2"
+
+  # Users presentation - widgets
+  - path: "{{ project_name }}/lib/modules/users/presentation/widgets"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/users/presentation/widgets/user_card.dart"
+    type: file
+    source: "lib/modules/users/presentation/widgets/user_card.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/users/presentation/widgets/user_form.dart"
+    type: file
+    source: "lib/modules/users/presentation/widgets/user_form.dart.j2"
+
+  # Users routes
+  - path: "{{ project_name }}/lib/modules/users/routes"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/users/routes/user_paths.dart"
+    type: file
+    source: "lib/modules/users/routes/user_paths.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/users/routes/user_routes.dart"
+    type: file
+    source: "lib/modules/users/routes/user_routes.dart.j2"
+
+  # Shared directory (cross-module utilities)
+  - path: "{{ project_name }}/lib/shared"
+    type: dir
+
+  # Shared - widgets
+  - path: "{{ project_name }}/lib/shared/widgets"
+    type: dir
+
+  - path: "{{ project_name }}/lib/shared/widgets/custom_button.dart"
+    type: file
+    source: "lib/shared/widgets/custom_button.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/loading_indicator.dart"
+    type: file
+    source: "lib/shared/widgets/loading_indicator.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/error_widget.dart"
+    type: file
+    source: "lib/shared/widgets/error_widget.dart.j2"
+
+  # Shared - utils
+  - path: "{{ project_name }}/lib/shared/utils"
+    type: dir
+
+  - path: "{{ project_name }}/lib/shared/utils/validators.dart"
+    type: file
+    source: "lib/shared/utils/validators.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utils/extensions.dart"
+    type: file
+    source: "lib/shared/utils/extensions.dart.j2"
+
+  # Routes configuration (app-level routing with go_router)
+  - path: "{{ project_name }}/lib/routes"
+    type: dir
+
+  - path: "{{ project_name }}/lib/routes/app_routes.dart"
+    type: file
+    source: "lib/routes/app_routes.dart.j2"
+
+  # App configuration
+  - path: "{{ project_name }}/lib/app.dart"
+    type: file
+    source: "lib/app.dart.j2"
+
+  # Environment configuration
+  - path: "{{ project_name }}/.env.example"
+    type: file
+    source: ".env.example.j2"
+
+  # Documentation
+  - path: "{{ project_name }}/docs"
+    type: dir
+
+  - path: "{{ project_name }}/docs/ARCHITECTURE.md"
+    type: file
+    source: "docs/ARCHITECTURE.md.j2"
+
+  - path: "{{ project_name }}/docs/MODULE_GUIDE.md"
+    type: file
+    source: "docs/MODULE_GUIDE.md.j2"
 
 # Hooks execute shell scripts at specific points in the generation lifecycle
 hooks:
   pre_gen:
     script: "scripts/pre_gen.sh"
-    description: "Creates Flutter project using flutter create command"
-    
+    description: "Validates Flutter installation and creates Flutter project"
+
   post_gen:
     script: "scripts/post_gen.sh"
-    description: "Installs basic Flutter packages and sets up project dependencies"
+    description: "Installs packages (graphql_flutter, go_router, provider), sets up GraphQL configuration"

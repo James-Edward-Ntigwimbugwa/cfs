@@ -1,0 +1,87 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/loading_indicator.dart';
+import '../providers/user_provider.dart';
+import '../widgets/user_form.dart';
+
+/// Screen for editing an existing user
+class UserEditScreen extends StatefulWidget {
+  final String userId;
+
+  const UserEditScreen({
+    super.key,
+    required this.userId,
+  });
+
+  @override
+  State<UserEditScreen> createState() => _UserEditScreenState();
+}
+
+class _UserEditScreenState extends State<UserEditScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProvider>().fetchUserById(widget.userId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit User'),
+      ),
+      body: Consumer<UserProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const LoadingIndicator();
+          }
+
+          final user = provider.selectedUser;
+          if (user == null) {
+            return const Center(child: Text('User not found'));
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: UserForm(
+              initialData: {
+                'name': user.name,
+                'email': user.email,
+                'avatar': user.avatar,
+                'bio': user.bio,
+              },
+              onSubmit: (data) async {
+                final success = await provider.updateUser(
+                  id: widget.userId,
+                  name: data['name'] as String,
+                  email: data['email'] as String,
+                  avatar: data['avatar'] as String?,
+                  bio: data['bio'] as String?,
+                );
+
+                if (success && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('User updated successfully')),
+                  );
+                  context.go('/users/${widget.userId}');
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        provider.error ?? 'Failed to update user',
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

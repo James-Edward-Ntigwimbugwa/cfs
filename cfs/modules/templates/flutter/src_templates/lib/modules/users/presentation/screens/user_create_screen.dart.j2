@@ -1,0 +1,48 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import '../providers/user_provider.dart';
+import '../widgets/user_form.dart';
+
+/// Screen for creating a new user
+class UserCreateScreen extends StatelessWidget {
+  const UserCreateScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create User'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: UserForm(
+          onSubmit: (data) async {
+            final success = await context.read<UserProvider>().createUser(
+              name: data['name'] as String,
+              email: data['email'] as String,
+              avatar: data['avatar'] as String?,
+              bio: data['bio'] as String?,
+            );
+
+            if (success && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('User created successfully')),
+              );
+              context.go('/users');
+            } else if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    context.read<UserProvider>().error ?? 'Failed to create user',
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+}

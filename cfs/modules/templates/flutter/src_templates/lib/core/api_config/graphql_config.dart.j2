@@ -1,0 +1,72 @@
+import 'package:flutter/foundation.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import '../constants/api_constants.dart';
+
+/// GraphQL client configuration
+class GraphQLConfig {
+  static HttpLink? _httpLink;
+  static ValueNotifier<GraphQLClient>? _client;
+
+  /// Initialize GraphQL client
+  static ValueNotifier<GraphQLClient> initializeClient() {
+    _httpLink = HttpLink(
+      ApiConstants.graphqlEndpoint,
+      defaultHeaders: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    _client = ValueNotifier(
+      GraphQLClient(
+        link: _httpLink!,
+        cache: GraphQLCache(
+          store: InMemoryStore(),
+        ),
+        defaultPolicies: DefaultPolicies(
+          query: Policies(
+            fetch: FetchPolicy.networkOnly,
+          ),
+          mutate: Policies(
+            fetch: FetchPolicy.networkOnly,
+          ),
+        ),
+      ),
+    );
+
+    return _client!;
+  }
+
+  /// Get current client instance
+  static ValueNotifier<GraphQLClient> get client {
+    if (_client == null) {
+      return initializeClient();
+    }
+    return _client!;
+  }
+
+  /// Update auth token
+  static void setAuthToken(String token) {
+    final AuthLink authLink = AuthLink(
+      getToken: () async => 'Bearer $token',
+    );
+
+    final Link link = authLink.concat(_httpLink!);
+
+    _client?.value = GraphQLClient(
+      link: link,
+      cache: GraphQLCache(
+        store: InMemoryStore(),
+      ),
+    );
+  }
+
+  /// Clear auth token
+  static void clearAuthToken() {
+    _client?.value = GraphQLClient(
+      link: _httpLink!,
+      cache: GraphQLCache(
+        store: InMemoryStore(),
+      ),
+    );
+  }
+}

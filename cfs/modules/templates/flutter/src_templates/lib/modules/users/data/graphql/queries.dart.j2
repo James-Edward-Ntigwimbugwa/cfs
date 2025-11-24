@@ -1,0 +1,42 @@
+/// GraphQL queries for User operations
+class UserQueries {
+  /// Fetch all users
+  static const String getAllUsers = r'''
+    query GetAllUsers {
+      users {
+        id
+        name
+        email
+        avatar
+        createdAt
+      }
+    }
+  ''';
+
+  /// Fetch single user by ID
+  static const String getUserById = r'''
+    query GetUserById($id: ID!) {
+      user(id: $id) {
+        id
+        name
+        email
+        avatar
+        bio
+        createdAt
+        updatedAt
+      }
+    }
+  ''';
+
+  /// Search users by name
+  static const String searchUsers = r'''
+    query SearchUsers($query: String!) {
+      searchUsers(query: $query) {
+        id
+        name
+        email
+        avatar
+      }
+    }
+  ''';
+}

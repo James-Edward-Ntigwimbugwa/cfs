@@ -1,0 +1,24 @@
+/// API constants and endpoints
+class ApiConstants {
+  // Base URL - Update this with your backend URL
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://api.example.com',
+  );
+
+  // GraphQL endpoint
+  static const String graphqlEndpoint = String.fromEnvironment(
+    'GRAPHQL_ENDPOINT',
+    defaultValue: '$baseUrl/graphql',
+  );
+
+  // API version
+  static const String apiVersion = 'v1';
+
+  // Timeout duration
+  static const Duration timeout = Duration(seconds: 30);
+
+  // Pagination
+  static const int defaultPageSize = 20;
+  static const int maxPageSize = 100;
+}

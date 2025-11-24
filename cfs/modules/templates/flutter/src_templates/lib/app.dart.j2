@@ -1,0 +1,39 @@
+import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:provider/provider.dart';
+import 'core/api_config/graphql_config.dart';
+import 'core/theme/app_theme.dart';
+import 'routes/app_routes.dart';
+import 'modules/users/data/repositories/user_repository.dart';
+import 'modules/users/presentation/providers/user_provider.dart';
+
+/// Main application widget
+class {{ app_name }}App extends StatelessWidget {
+  const {{ app_name }}App({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GraphQLProvider(
+      client: GraphQLConfig.client,
+      child: MultiProvider(
+        providers: [
+          // User module providers
+          ChangeNotifierProvider(
+            create: (context) => UserProvider(
+              UserRepository(GraphQLConfig.client.value),
+            ),
+          ),
+          // Add more module providers here
+        ],
+        child: MaterialApp.router(
+          title: '{{ app_name }}',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.system,
+          routerConfig: AppRouter.router,
+        ),
+      ),
+    );
+  }
+}
