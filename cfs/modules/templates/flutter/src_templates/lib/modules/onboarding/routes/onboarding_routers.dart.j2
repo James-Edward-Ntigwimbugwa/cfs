@@ -1,0 +1,25 @@
+// HIZI NI ZA SPECIFIC FEATURE
+import 'package:go_router/go_router.dart';
+import 'package:kiongozi/modules/onboarding/presentation/screens/new_onboarding.dart';
+
+import '../presentation/screens/splash_screen.dart';
+import 'onboarding_paths.dart';
+
+final List<GoRoute> onboardingRoutes = [
+  GoRoute(
+    name: OnboardingPaths.splashScreen,
+    path: OnboardingPaths.splashScreen,
+    builder: (context, state) => const SplashScreen(),
+  ),
+  // GoRoute(
+  //   name: OnboardingPaths.onBoardingScreen,
+  //   path: OnboardingPaths.onBoardingScreen,
+  //   builder: (context, state) => OnboardingScreen(),
+  // ),
+
+  GoRoute(
+    name: OnboardingPaths.onBoardingScreen,
+    path: OnboardingPaths.onBoardingScreen,
+    builder: (context, state) => NewOnboarding(),
+  ),
+];

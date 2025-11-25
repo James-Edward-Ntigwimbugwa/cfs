@@ -1,39 +1,48 @@
+import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:provider/provider.dart';
-import 'core/api_config/graphql_config.dart';
-import 'core/theme/app_theme.dart';
-import 'routes/app_routes.dart';
-import 'modules/users/data/repositories/user_repository.dart';
-import 'modules/users/presentation/providers/user_provider.dart';
+import 'package:sizer/sizer.dart';
+import 'package:toastification/toastification.dart';
 
-/// Main application widget
-class {{ app_name }}App extends StatelessWidget {
-  const {{ app_name }}App({super.key});
+import 'core/constants/dimensions.dart';
+import 'core/localization/controller/language_controller.dart';
+import 'core/localization/l10n/app_localizations.dart';
+import 'core/routes/app_routers.dart';
+import 'core/theme/controller/theme_controller.dart';
+import 'core/theme/modes/dark_theme.dart';
+import 'core/theme/modes/light_theme.dart';
+import 'modules/home/presentation/providers/calendar_provider.dart';
+
+class AppWrapper extends StatelessWidget {
+  const AppWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GraphQLProvider(
-      client: GraphQLConfig.client,
-      child: MultiProvider(
-        providers: [
-          // User module providers
-          ChangeNotifierProvider(
-            create: (context) => UserProvider(
-              UserRepository(GraphQLConfig.client.value),
-            ),
+    Dimensions.init(context);
+    final calendarProvider = context.watch<CalendarProvider>();
+
+    final themeController = context.watch<ThemeController>();
+    final languageController = context.watch<LanguageController>();
+    return Sizer(
+      builder: (context, oritentation, screenType) {
+        return ToastificationWrapper(
+          config: ToastificationConfig(
+            animationDuration: Duration(seconds: 1),
+            alignment: Alignment.bottomCenter,
+            maxToastLimit: 1,
           ),
-          // Add more module providers here
-        ],
-        child: MaterialApp.router(
-          title: '{{ app_name }}',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          routerConfig: AppRouter.router,
-        ),
-      ),
+            child: MaterialApp.router(
+              routerConfig: appRouter,
+              theme: lightTheme,
+              darkTheme: darkTheme,
+              themeMode: themeController.appThemeMode,
+              debugShowCheckedModeBanner: false,
+              locale: languageController.locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+            ),
+        );
+      }
     );
   }
 }

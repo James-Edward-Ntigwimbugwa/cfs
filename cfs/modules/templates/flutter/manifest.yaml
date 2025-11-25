@@ -62,9 +62,9 @@ structure:
   - path: "{{ project_name }}/lib/core/theme"
     type: dir
 
-  - path: "{{ project_name }}/lib/core/theme/app_theme.dart"
+  - path: "{{ project_name }}/lib/core/theme/app_theme.dart.j2"
     type: file
-    source: "lib/core/theme/app_theme.dart.j2"
+    source: "lib/core/theme/app_theme.dart.j2.j2"
 
   - path: "{{ project_name }}/lib/core/theme/color.dart"
     type: file

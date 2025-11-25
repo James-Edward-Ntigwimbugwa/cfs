@@ -1,0 +1,26 @@
+import '../../../../core/constants/graphql_objects.dart';
+
+const String getMyProfileQueryString = '''
+query getMyProfile {
+  getMyProfile {
+    $defaultResponseObjectString
+    data {
+      uuid
+      profilePhotoUrl
+      phone
+      middleName
+      lastName
+      fullName
+      firstName
+      email
+      permissions {
+        name
+      }
+      institution {
+        nameEn
+        nameSw
+      }
+    }
+  }
+}
+''';

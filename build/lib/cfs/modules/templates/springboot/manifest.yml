@@ -1,0 +1,259 @@
+# Spring Boot Template Manifest
+# This file defines the template structure, variables, and hooks for the cfs generator
+
+name: springboot
+description: Spring Boot application template with support for REST, GraphQL, and WebSocket APIs
+version: 1.0.0
+
+# Variables define the inputs users provide when scaffolding
+variables:
+  project_name:
+    type: string
+    prompt: "Project name (used for artifact ID and directory name)"
+    default: "spring-app"
+    validation: "^[a-z][a-z0-9-]*$"
+    
+  package_name:
+    type: string
+    prompt: "Base package name (e.g., com.example.app)"
+    default: "com.example.app"
+    validation: "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$"
+    
+  language:
+    type: choice
+    prompt: "Programming language"
+    choices: ["java", "kt"]
+    default: "java"
+    
+  api_protocol:
+    type: choice
+    prompt: "API protocol type"
+    choices: ["rest", "graphql", "websocket"]
+    default: "rest"
+    
+  java_version:
+    type: string
+    prompt: "Java version"
+    default: "17"
+    validation: "^(11|17|21)$"
+
+# Computed variables (derived from user inputs)
+computed:
+  package_path: "{{ package_name.replace('.', '/') }}"
+  main_class_name: "{{ project_name.replace('-', ' ').title().replace(' ', '') }}Application"
+  language_dir: "{{ 'kotlin' if language == 'kt' else 'java' }}"
+  file_extension: "{{ 'kt' if language == 'kt' else 'java' }}"
+
+# Files source directory containing Jinja2 templates
+files_source: "src_templates"
+
+# Structure defines the directory and file layout of the generated project
+# Corrected structure section for manifest.yml
+
+structure:
+  # Root project directory
+  - path: "{{ project_name }}"
+    type: dir
+    
+  # Root-level files - these should be at src_templates/ root level
+  - path: "{{ project_name }}/pom.xml"
+    type: file
+    source: "pom.xml.j2"  # Should exist at: src_templates/pom.xml.j2
+    
+  - path: "{{ project_name }}/.gitignore"
+    type: file
+    source: "gitignore.j2"  # Should exist at: src_templates/gitignore.j2 (no dot prefix in src)
+    
+  - path: "{{ project_name }}/README.md"
+    type: file
+    source: "README.md.j2"  # Should exist at: src_templates/README.md.j2
+
+    #sqlite database
+  - path: "{{ project_name }}/data"
+    type: dir
+  - path: "{{ project_name }}/data/app.db"
+    type: file
+    source: "app.db.j2"
+
+
+  # Source directory structure
+  - path: "{{ project_name }}/src"
+    type: dir
+    
+  - path: "{{ project_name }}/src/main"
+    type: dir
+    
+  - path: "{{ project_name }}/src/main/{{ language_dir }}"
+    type: dir
+    
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}"
+    type: dir
+    
+  # Application entry point
+  # Template path should match your src_templates structure
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/{{ project_name | title | replace('-', '') | replace('_', '') }}.{{ file_extension }}"
+    type: file
+    source: "Application.{{ file_extension }}.j2"
+
+    # Example output:
+    # myProject/src/main/kotlin/com/example/myproject/ProjectApplication.kt
+
+
+  # Controller layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/controllers"
+    type: dir
+    
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/controllers/UserController.{{ file_extension }}"
+    type: file
+    source: "UserController.{{ file_extension }}.j2"
+    
+  # Model layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models"
+    type: dir
+    
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models/User.{{ file_extension }}"
+    type: file
+    source: "User.{{ file_extension }}.j2"
+
+  # Model layer / BaseEntity
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/models/BaseEntity.{{ file_extension }}"
+    type: file
+    source: "BaseEntity.{{ file_extension }}.j2"
+
+  # Config layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/configs"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/configs/.gitkeep"
+    type: file
+    source: "gitkeep.j2"
+
+  # Enums
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/enums"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/enums/UserRolesEnum.{{file_extension}}"
+    type: file
+    source: "UserRolesEnum.{{file_extension}}.j2"
+
+  #Service layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/services"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/services/UserService.{{ file_extension }}"
+    type: file
+    source: "UserService.{{ file_extension }}.j2"
+
+
+  #DTOs
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/UserDTO.{{ file_extension }}"
+    type: file
+    source: "UserDTO.{{ file_extension }}.j2"
+
+  #DTOs
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/ErrorResponse.{{ file_extension }}"
+    type: file
+    source: "ErrorResponse.{{ file_extension }}.j2"
+
+  #DTOs
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/dtos/UserResponseDTO.{{ file_extension }}"
+    type: file
+    source: "UserResponseDTO.{{ file_extension }}.j2"
+
+  #Implementation layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/impls"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/impls/UserServiceImpl.{{ file_extension }}"
+    type: file
+    source: "UserServiceImpl.{{ file_extension }}.j2"
+
+    
+  # Repository layer
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/repositories"
+    type: dir
+    
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/repositories/UserRepository.{{ file_extension }}"
+    type: file
+    source: "UserRepository.{{ file_extension }}.j2"
+
+  #Exceptions
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserAlreadyExistsException.{{ file_extension }}"
+    type: file
+    source: "UserAlreadyExistsException.{{ file_extension }}.j2"
+
+  #Exceptions
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserCreationException.{{ file_extension }}"
+    type: file
+    source: "UserCreationException.{{ file_extension }}.j2"
+
+
+  #Exceptions
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/UserNotFoundException.{{ file_extension }}"
+    type: file
+    source: "UserNotFoundException.{{ file_extension }}.j2"
+
+  #Exceptions
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/exceptions/GlobalExceptionHandler.{{ file_extension }}"
+    type: file
+    source: "GlobalExceptionHandler.{{ file_extension }}.j2"
+
+  #Mapper
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/mappers"
+    type: dir
+
+  - path: "{{ project_name }}/src/main/{{ language_dir }}/{{ package_path }}/mappers/UserMapper.{{ file_extension }}"
+    type: file
+    source: "UserMapper.{{ file_extension }}.j2"
+    
+  # Resources
+  - path: "{{ project_name }}/src/main/resources"
+    type: dir
+    
+  - path: "{{ project_name }}/src/main/resources/application.properties"
+    type: file
+    source: "application.properties.j2"
+    
+  # Test directories
+  - path: "{{ project_name }}/src/test"
+    type: dir
+    
+  - path: "{{ project_name }}/src/test/{{ language_dir }}"
+    type: dir
+    
+  - path: "{{ project_name }}/src/test/{{ language_dir }}/{{ package_path }}"
+    type: dir
+
+# Hooks execute shell scripts at specific points in the generation lifecycle
+hooks:
+  pre_gen:
+    script: "scripts/pre_gen.sh"
+    description: "Validates inputs before generation"
+    
+  post_gen:
+    script: "scripts/post_gen.sh"
+    description: "Initializes git, creates build directory, adds protocol-specific documentation"
