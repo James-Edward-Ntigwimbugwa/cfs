@@ -1,0 +1,84 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_easy_validator/flutter_easy_validator.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kiongozi/core/theme/modes/app_colors.dart';
+import 'package:kiongozi/modules/authentication/routes/authentication_paths.dart';
+
+import '../../../../core/constants/dimensions.dart';
+import '../../../../core/enums/text_type.dart';
+import '../../../../gen/assets.gen.dart';
+import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/custom_text.dart';
+import '../../../../shared/widgets/custom_text_form_field.dart';
+import '../../../../shared/widgets/glass_container.dart';
+
+class ForgotPassword extends StatelessWidget {
+  ForgotPassword({super.key});
+  final usernameController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: GlassContainer(
+              height: Dimensions.screenHeight,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: Dimensions.width16),
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: MediaQuery.of(context).size.height,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        spacing: Dimensions.height12,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Assets.images.bibinabwana.image(scale: 20),
+                          CustomText(
+                            text: "Reset Password",
+                            textType: TextType.titleText,
+                          ),
+                          CustomText(
+                            text:
+                                "Fill information below to reset your password",
+                          ),
+                          CustomInputField(
+                            hintText: "Username/Email",
+                            validator: EasyValidator.email().validate,
+                            controller: usernameController,
+                          ),
+                          SizedBox(
+                            width: double.infinity,
+                            height: Dimensions.height48,
+                            child: CustomButton(
+                              onPressed: () {},
+                              child: CustomText(
+                                color: AppColors.white,
+                                text: "Reset Password",
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: Dimensions.width12),
+                          GestureDetector(
+                            onTap: () => context.go(AuthenticationPaths.login),
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: CustomText(text: "Have account ? Sign In"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

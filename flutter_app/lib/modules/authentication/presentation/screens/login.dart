@@ -1,0 +1,212 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_easy_validator/flutter_easy_validator.dart';
+import 'package:heroicons/heroicons.dart';
+import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
+
+import '../../../../core/constants/dimensions.dart';
+import '../../../../core/theme/modes/app_colors.dart';
+import '../../../../gen/assets.gen.dart';
+import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/custom_text.dart';
+import '../../../../shared/widgets/custom_text_form_field.dart';
+import '../../../../shared/widgets/loading_widget.dart';
+import '../../../../shared/widgets/text_component.dart';
+import '../providers/auth_provider.dart';
+
+class Login extends StatefulWidget {
+  const Login({super.key});
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  final usernameController = TextEditingController(text: 'pmouser@pmo.go.tz');
+
+  final passwordController = TextEditingController(text: '!Pmo@123');
+
+  final _formKey = GlobalKey<FormState>();
+
+  bool obscureText = true;
+
+  @override
+  Widget build(BuildContext context) {
+    Dimensions.init(context);
+
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        return Scaffold(
+          resizeToAvoidBottomInset:
+              true, // ensures body resizes when keyboard shows
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.lerp(
+                    AppColors.greenMain.withAlpha(150),
+                    AppColors.greenMain,
+                    2,
+                  )!,
+                  Color.lerp(Colors.white, AppColors.tealGreen, 1)!,
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: Dimensions.width28),
+              child: SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        spacing: Dimensions.height12,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Assets.images.bibinabwana.image(scale: 20),
+                          TextComponent(
+                            text: "Sign In to Kiongozi App",
+                            fontWeight: FontWeight.w800,
+                            fontSize: 26,
+                            textColor: AppColors.white,
+                          ),
+                          TextComponent(
+                            text:
+                                "Enter your credentials to access your Kiongozi App account",
+                            fontWeight: FontWeight.w300,
+                            fontSize: 16,
+                            textAlignemt: TextAlign.center,
+                            textColor: AppColors.white,
+                          ),
+                          CustomInputField(
+                            hintText: "Username",
+                            validator: EasyValidator.required(
+                              "Username is required",
+                            ).validate,
+                            controller: usernameController,
+                            prefix: Icon(
+                              Icons.mail,
+                              color: AppColors.greenMain,
+                            ),
+
+                            borderColor: AppColors.white,
+                            textColor: AppColors.white,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          CustomInputField(
+                            hintText: "Password",
+                            controller: passwordController,
+                            textColor: AppColors.white,
+                            prefix: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  obscureText = !obscureText;
+                                });
+                              },
+                              child: Icon(
+                                Icons.lock_outline,
+                                color: AppColors.greenMain,
+                              ),
+                            ),
+                            obscureText: obscureText,
+                            suffix: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  obscureText = !obscureText;
+                                });
+                              },
+                              child: HeroIcon(
+                                obscureText
+                                    ? HeroIcons.eye
+                                    : HeroIcons.eyeSlash,
+                                color: AppColors.white,
+                              ),
+                            ),
+                            borderColor: AppColors.white,
+                            validator: EasyValidator.compose([
+                              EasyValidator.required("Password is required"),
+                              EasyValidator.minLength(
+                                6,
+                                "Password must be at least 6 characters",
+                              ),
+                            ]).validate,
+                          ),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextComponent(
+                                  text: "Forgot Password ?",
+                                  textAlignemt: TextAlign.right,
+                                  fontWeight: FontWeight.w300,
+                                  textColor: AppColors.white,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: double.infinity,
+                            height: Dimensions.height48,
+                            child: CustomButton(
+                              onPressed: () async {
+                                if (_formKey.currentState?.validate() ??
+                                    false) {
+                                  await authProvider.login(
+                                    username: usernameController.text,
+                                    password: passwordController.text,
+                                  );
+
+                                  if (authProvider.isLoggedIn) {
+                                    authProvider.isLoading = true;
+                                    authProvider.isLoading = false;
+                                  } else {
+                                    toastification.show(
+                                      type: ToastificationType.error,
+                                      autoCloseDuration: Duration(seconds: 3),
+                                      title: CustomText(text: "Log in failed"),
+                                      description: CustomText(
+                                        text: authProvider.message,
+                                      ),
+                                    );
+                                  }
+                                } else {
+                                  toastification.show(
+                                    type: ToastificationType.error,
+                                    autoCloseDuration: Duration(seconds: 3),
+                                    title: CustomText(text: "Validation Error"),
+                                    description: CustomText(
+                                      text: "Please fix all fields correctly!",
+                                    ),
+                                  );
+                                }
+                              },
+                              backgroundColor: AppColors.greenMain,
+                              child: authProvider.isLoading
+                                  ? LoadingWidget(color: Colors.white)
+                                  : TextComponent(
+                                      text: "Sign In",
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                            ),
+                          ),
+                          SizedBox(height: Dimensions.height4),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

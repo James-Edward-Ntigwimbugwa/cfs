@@ -1,0 +1,14 @@
+import 'package:go_router/go_router.dart';
+
+import '../../modules/authentication/routes/authentication_paths.dart';
+import '../../modules/authentication/routes/authentication_routers.dart';
+import '../../modules/onboarding/routes/onboarding_routers.dart';
+
+final GoRouter appRouter = GoRouter(
+  initialLocation: AuthenticationPaths.login,
+  routes: [
+    // APP LEVEL ROUTES
+    ...onboardingRoutes,
+    ...authenticationRoutes,
+  ],
+);

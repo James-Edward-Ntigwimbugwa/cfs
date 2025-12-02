@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/constants/dimensions.dart';
+import '../../../../core/theme/modes/app_colors.dart';
+import '../../../../gen/assets.gen.dart';
+import '../providers/onboarding_provider.dart';
+
+class OnboardingTopComponent extends StatelessWidget {
+  final PageController controller;
+  const OnboardingTopComponent({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Consumer<OnboardingProvider>(
+      builder: (context, provider, child) {
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: Dimensions.width8,
+            vertical: 8,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Logo
+              Row(
+                spacing: 4,
+                children: [
+                  Assets.images.bibinabwana.image(height: 20),
+                  Text(
+                    "Kiongozi ",
+                    style: theme.textTheme.titleMedium!.copyWith(
+                      color: AppColors.greenMain,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Text(
+                    "App",
+                    style: theme.textTheme.titleMedium!.copyWith(
+                      color: AppColors.black,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+
+              // Skip button (hide on last page)
+              if (provider.currentPage != provider.totalPages - 1) ...[
+                GestureDetector(
+                  onTap: () {
+                    provider.skipToLastPage(controller);
+                  },
+                  child: Text(
+                    "Skip",
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      color: AppColors.greenMain,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
