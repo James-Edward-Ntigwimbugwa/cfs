@@ -12,7 +12,7 @@ from cfs.modules.templates.flutter.core.exceptions.flutter_manifest_validation_e
 
 def _validate_computed_variables(computed: Dict[str, Any]) -> None:
     """Validate Flutter computed variables."""
-    required_computed = ['package_path']
+    required_computed = ['org_identifier' , 'app_name']
 
     for var in required_computed:
         if var not in computed:
@@ -64,9 +64,9 @@ class FlutterManifestLoader:
             template_path: Path to the Flutter template directory
         """
         self.template_path = Path(template_path)
-        self.manifest_path = self.template_path / "manifest.yml"
+        self.manifest_path = self.template_path / "manifest.yaml"
         
-    def load(self) -> Dict[str, Any]:
+    def load_manifest(self) -> Dict[str, Any]:
         """
         Load and parse the Flutter manifest file.
         

@@ -48,27 +48,122 @@ structure:
   - path: "{{ project_name }}/lib/core/api_config"
     type: dir
 
-  - path: "{{ project_name }}/lib/core/api_config/graphql_config.dart"
+
+  - path: "{{ project_name }}/lib/core/api_config/graphql"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/api_config/graphql/graphql_url_config.dart"
     type: file
-    source: "lib/core/api_config/graphql_config.dart.j2"
+    source: "lib/core/api_config/graphql/graphql_url_config.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/api_config/graphql/graphql_service.dart"
+    type: file
+    source: "lib/core/api_config/graphql/graphql_service.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/api_config/graphql/graphql_operation.dart"
+    type: file
+    source: "lib/core/api_config/graphql/graphql_operation.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/api_config/rest"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/api_config/rest/rest_api_service.dart"
+    type: file
+    source: "lib/core/api_config/rest/rest_api_service.dart.j2"
 
   - path: "{{ project_name }}/lib/core/constants"
     type: dir
 
-  - path: "{{ project_name }}/lib/core/constants/api_constants.dart"
+  - path: "{{ project_name }}/lib/core/constants/dimensions.dart"
     type: file
-    source: "lib/core/constants/api_constants.dart.j2"
+    source: "lib/core/constants/dimensions.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/constants/graphql_objects.dart"
+    type: file
+    source: "lib/core/constants/graphql_objects.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/enums"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/enums/global_reusable_state.dart.j2"
+    type: file
+    source: "lib/core/enums/global_reusable_state.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/enums/graphql_operation_enum.dart.j2"
+    type: file
+    source: "lib/core/enums/graphql_operation_enum.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/enums/text_type.dart.j2"
+    type: file
+    source: "lib/core/enums/text_type.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/injection"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/injection/dependency_injection.dart"
+    type: file
+    source: "lib/core/injection/dependency_injection.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/localizations"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/localizations/.gitkeep"
+    type: file
+    source: "lib/core/localizations/.gitkeep"
+
+  - path: "{{ project_name }}/lib/core/mixins"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/mixins/app_theme_mixin.dart"
+    type: file
+    source: "lib/core/mixins/app_theme_mixin.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/routes"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/routes/app_routers.dart"
+    type: file
+    source: "lib/core/routes/app_routers.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/storage"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/storage/flutter_secure_storage_keys.dart"
+    type: file
+    source: "lib/core/storage/flutter_secure_storage_keys.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/storage/flutter_secure_storage_service.dart"
+    type: file
+    source: "lib/core/storage/flutter_secure_storage_service.dart.j2"
 
   - path: "{{ project_name }}/lib/core/theme"
     type: dir
 
-  - path: "{{ project_name }}/lib/core/theme/app_theme.dart.j2"
+  - path: "{{ project_name }}/lib/core/theme/app_theme.dart"
     type: file
-    source: "lib/core/theme/app_theme.dart.j2.j2"
+    source: "lib/core/theme/app_theme.dart.j2"
 
-  - path: "{{ project_name }}/lib/core/theme/color.dart"
+  - path: "{{ project_name }}/lib/core/theme/app_colors.dart"
     type: file
-    source: "lib/core/theme/color.dart.j2"
+    source: "lib/core/theme/app_colors.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/theme/controller"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/theme/controller/theme_controller.dart"
+    type: file
+    source: "lib/core/theme/controller/theme_controller.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/theme/modes"
+    type: dir
+
+  - path: "{{ project_name }}/lib/core/theme/modes/dark_theme.dart"
+    type: file
+    source: "lib/core/theme/modes/dark_theme.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/theme/modes/light_theme.dart"
+    type: file
+    source: "lib/core/theme/modes/light_theme.dart.j2"
 
   - path: "{{ project_name }}/lib/core/gen"
     type: dir
@@ -81,145 +176,291 @@ structure:
   - path: "{{ project_name }}/lib/modules"
     type: dir
 
-  # User module (default demo module with GraphQL CRUD)
-  - path: "{{ project_name }}/lib/modules/users"
+  # Authentication module (default demo module with GraphQL CRUD)
+  - path: "{{ project_name }}/lib/modules/authentication"
     type: dir
 
-  # Users data layer
-  - path: "{{ project_name }}/lib/modules/users/data"
+  # authentication data layer
+  - path: "{{ project_name }}/lib/modules/authentication/data"
     type: dir
 
-  # Users data - models
-  - path: "{{ project_name }}/lib/modules/users/data/models"
+  # authentication data - models
+  - path: "{{ project_name }}/lib/modules/authentication/data/graphql"
     type: dir
 
-  - path: "{{ project_name }}/lib/modules/users/data/models/user_model.dart"
+  - path: "{{ project_name }}/lib/modules/authentication/data/graphql/queries.dart"
     type: file
-    source: "lib/modules/users/data/models/user_model.dart.j2"
+    source: "lib/modules/authentication/data/graphql/queries.dart.j2"
 
-  # Users data - services
-  - path: "{{ project_name }}/lib/modules/users/data/services"
+  - path: "{{ project_name }}/lib/modules/authentication/data/graphql/mutations.dart"
+    type: file
+    source: "lib/modules/authentication/data/graphql/mutations.dart.j2"
+
+  # authentication data - models
+  - path: "{{ project_name }}/lib/modules/authentication/data/models"
     type: dir
 
-  - path: "{{ project_name }}/lib/modules/users/data/services/user_service.dart"
-    type: file
-    source: "lib/modules/users/data/services/user_service.dart.j2"
-
-  # Users data - graphql
-  - path: "{{ project_name }}/lib/modules/users/data/graphql"
-    type: dir
-
-  - path: "{{ project_name }}/lib/modules/users/data/graphql/mutations.dart"
-    type: file
-    source: "lib/modules/users/data/graphql/mutations.dart.j2"
-
-  - path: "{{ project_name }}/lib/modules/users/data/graphql/queries.dart"
-    type: file
-    source: "lib/modules/users/data/graphql/queries.dart.j2"
-
-  # Users data - repositories
+  # authentication data - services
   - path: "{{ project_name }}/lib/modules/users/data/repositories"
     type: dir
 
-  - path: "{{ project_name }}/lib/modules/users/data/repositories/user_repository.dart"
-    type: file
-    source: "lib/modules/users/data/repositories/user_repository.dart.j2"
-
-  # Users presentation layer
-  - path: "{{ project_name }}/lib/modules/users/presentation"
+  # authentication data - services
+  - path: "{{ project_name }}/lib/modules/users/data/services"
     type: dir
 
-  # Users presentation - providers
-  - path: "{{ project_name }}/lib/modules/users/presentation/providers"
+  - path: "{{ project_name }}/lib/modules/authentication/data/services/auth_local_data_source.dart"
+    type: file
+    source: "lib/modules/authentication/data/services/auth_local_data_source.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/authentication/data/services/auth_remote_data_source.dart"
+    type: file
+    source: "lib/modules/authentication/data/services/auth_remote_data_source.dart.j2"
+
+  # authentication presentation layer
+  - path: "{{ project_name }}/lib/modules/authentication/presentation"
     type: dir
 
-  - path: "{{ project_name }}/lib/modules/users/presentation/providers/user_provider.dart"
-    type: file
-    source: "lib/modules/users/presentation/providers/user_provider.dart.j2"
+  # authentication presentation - providers
+  - path: "{{ project_name }}/lib/modules/authentication/presentation/providers"
+    type: dir
 
-  # Users presentation - screens
+  - path: "{{ project_name }}/lib/modules/authentication/presentation/providers/auth_provider.dart"
+    type: file
+    source: "lib/modules/authentication/presentation/providers/auth_provider.dart.j2"
+
+  # authentication presentation - screens
   - path: "{{ project_name }}/lib/modules/users/presentation/screens"
     type: dir
 
-  - path: "{{ project_name }}/lib/modules/users/presentation/screens/user_list_screen.dart"
+  - path: "{{ project_name }}/lib/modules/authentication/presentation/screens/change_password.dart"
     type: file
-    source: "lib/modules/users/presentation/screens/user_list_screen.dart.j2"
+    source: "lib/modules/authentication/presentation/screens/change_password.dart.j2"
 
-  - path: "{{ project_name }}/lib/modules/users/presentation/screens/user_detail_screen.dart"
+  - path: "{{ project_name }}/lib/modules/authentication/presentation/screens/forgot_password.dart"
     type: file
-    source: "lib/modules/users/presentation/screens/user_detail_screen.dart.j2"
+    source: "lib/modules/authentication/presentation/screens/forgot_password.dart.j2"
 
-  - path: "{{ project_name }}/lib/modules/users/presentation/screens/user_create_screen.dart"
+  - path: "{{ project_name }}/lib/modules/authentication/presentation/screens/login.dart"
     type: file
-    source: "lib/modules/users/presentation/screens/user_create_screen.dart.j2"
+    source: "lib/modules/authentication/presentation/screens/login.dart.j2"
 
-  - path: "{{ project_name }}/lib/modules/users/presentation/screens/user_edit_screen.dart"
-    type: file
-    source: "lib/modules/users/presentation/screens/user_edit_screen.dart.j2"
 
-  # Users presentation - widgets
-  - path: "{{ project_name }}/lib/modules/users/presentation/widgets"
+  # authentication routes
+  - path: "{{ project_name }}/lib/modules/authentication/routes"
     type: dir
 
-  - path: "{{ project_name }}/lib/modules/users/presentation/widgets/user_card.dart"
+  - path: "{{ project_name }}/lib/modules/authentication/routes/authentication_paths.dart"
     type: file
-    source: "lib/modules/users/presentation/widgets/user_card.dart.j2"
+    source: "lib/modules/authentication/routes/authentication_paths.dart.j2"
 
-  - path: "{{ project_name }}/lib/modules/users/presentation/widgets/user_form.dart"
+  - path: "{{ project_name }}/lib/modules/authentication/routes/authentication_routers.dart"
     type: file
-    source: "lib/modules/users/presentation/widgets/user_form.dart.j2"
+    source: "lib/modules/authentication/routes/authentication_routers.dart.j2"
 
-  # Users routes
-  - path: "{{ project_name }}/lib/modules/users/routes"
+  # Onboarding module
+  - path: "{{ project_name }}/lib/modules/onboarding"
     type: dir
 
-  - path: "{{ project_name }}/lib/modules/users/routes/user_paths.dart"
-    type: file
-    source: "lib/modules/users/routes/user_paths.dart.j2"
+  # onboarding data layer
+  - path: "{{ project_name }}/lib/modules/onboarding/data"
+    type: dir
 
-  - path: "{{ project_name }}/lib/modules/users/routes/user_routes.dart"
-    type: file
-    source: "lib/modules/users/routes/user_routes.dart.j2"
+  # onboarding data - models
+  - path: "{{ project_name }}/lib/modules/onboarding/data/models"
+    type: dir
 
-  # Shared directory (cross-module utilities)
+  # onboarding data - services
+  - path: "{{ project_name }}/lib/modules/onboarding/data/services"
+    type: dir
+
+  # onboarding presentation layer
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation"
+    type: dir
+
+  # onboarding presentation - providers
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/providers"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/providers/on_boarding_provider.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/providers/on_boarding_provider.dart.j2"
+
+  # onboarding presentation - screens
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/screens"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/screens/new_onboarding.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/screens/new_onboarding.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/screens/onboarding.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/screens/onboarding.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/screens/page_one.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/screens/page_one.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/screens/page_two.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/screens/page_two.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/screens/page_three.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/screens/page_three.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/screens/page_four.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/screens/page_four.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/screens/splash_screen.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/screens/splash_screen.dart.j2"
+
+  # onboarding presentation - widgets
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/widgets"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/onboarding/presentation/widgets/onboarding_top_component.dart"
+    type: file
+    source: "lib/modules/onboarding/presentation/widgets/onboarding_top_component.dart.j2"
+
+  # onboarding routes
+  - path: "{{ project_name }}/lib/modules/onboarding/routes"
+    type: dir
+
+  - path: "{{ project_name }}/lib/modules/onboarding/routes/onboarding_paths.dart"
+    type: file
+    source: "lib/modules/onboarding/routes/onboarding_paths.dart.j2"
+
+  - path: "{{ project_name }}/lib/modules/onboarding/routes/onboarding_routers.dart"
+    type: file
+    source: "lib/modules/onboarding/routes/onboarding_routers.dart.j2"
+
+    # Shared directory (cross-module utilities)
   - path: "{{ project_name }}/lib/shared"
     type: dir
 
-  # Shared - widgets
+  # Shared utilities directory
+  - path: "{{ project_name }}/lib/shared/utilities"
+    type: dir
+
+  # Shared utilities - helper methods
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods"
+    type: dir
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/avatar_color_generator.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/avatar_color_generator.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/bottom_circle_clipper.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/bottom_circle_clipper.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/center_right_clipper.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/center_right_clipper.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/date_formatter.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/date_formatter.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/date_to_iso_string.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/date_to_iso_string.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/device_orientation_checker.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/device_orientation_checker.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/device_security_checker.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/device_security_checker.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/format_time_ago.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/format_time_ago.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/name_initials.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/name_initials.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/utilities/helper_methods/word_capitalizer.dart"
+    type: file
+    source: "lib/shared/utilities/helper_methods/word_capitalizer.dart.j2"
+
+
+  # Shared widgets
   - path: "{{ project_name }}/lib/shared/widgets"
     type: dir
+
+  - path: "{{ project_name }}/lib/shared/widgets/animated_circle.dart"
+    type: file
+    source: "lib/shared/widgets/animated_circle.dart.j2"
 
   - path: "{{ project_name }}/lib/shared/widgets/custom_button.dart"
     type: file
     source: "lib/shared/widgets/custom_button.dart.j2"
 
-  - path: "{{ project_name }}/lib/shared/widgets/loading_indicator.dart"
+  - path: "{{ project_name }}/lib/shared/widgets/custom_date_picker.dart"
     type: file
-    source: "lib/shared/widgets/loading_indicator.dart.j2"
+    source: "lib/shared/widgets/custom_date_picker.dart.j2"
 
-  - path: "{{ project_name }}/lib/shared/widgets/error_widget.dart"
+  - path: "{{ project_name }}/lib/shared/widgets/custom_dropdown_field.dart"
     type: file
-    source: "lib/shared/widgets/error_widget.dart.j2"
+    source: "lib/shared/widgets/custom_dropdown_field.dart.j2"
 
-  # Shared - utils
-  - path: "{{ project_name }}/lib/shared/utils"
-    type: dir
-
-  - path: "{{ project_name }}/lib/shared/utils/validators.dart"
+  - path: "{{ project_name }}/lib/shared/widgets/custom_text.dart"
     type: file
-    source: "lib/shared/utils/validators.dart.j2"
+    source: "lib/shared/widgets/custom_text.dart.j2"
 
-  - path: "{{ project_name }}/lib/shared/utils/extensions.dart"
+  - path: "{{ project_name }}/lib/shared/widgets/custom_text_field.dart"
     type: file
-    source: "lib/shared/utils/extensions.dart.j2"
+    source: "lib/shared/widgets/custom_text_field.dart.j2"
 
-  # Routes configuration (app-level routing with go_router)
-  - path: "{{ project_name }}/lib/routes"
-    type: dir
-
-  - path: "{{ project_name }}/lib/routes/app_routes.dart"
+  - path: "{{ project_name }}/lib/shared/widgets/custom_text_form_field.dart"
     type: file
-    source: "lib/routes/app_routes.dart.j2"
+    source: "lib/shared/widgets/custom_text_form_field.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/custom_to_previous_page_btn.dart"
+    type: file
+    source: "lib/shared/widgets/custom_to_previous_page_btn.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/glass_container.dart"
+    type: file
+    source: "lib/shared/widgets/glass_container.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/loading_widget.dart"
+    type: file
+    source: "lib/shared/widgets/loading_widget.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/notification_circle.dart"
+    type: file
+    source: "lib/shared/widgets/notification_circle.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/page_header.dart"
+    type: file
+    source: "lib/shared/widgets/page_header.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/radial_chart.dart"
+    type: file
+    source: "lib/shared/widgets/radial_chart.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/status_card.dart"
+    type: file
+    source: "lib/shared/widgets/status_card.dart.j2"
+
+  - path: "{{ project_name }}/lib/shared/widgets/text_component.dart"
+    type: file
+    source: "lib/shared/widgets/text_component.dart.j2"
+
+
+
+  # Shared - providers
+  - path: "{{ project_name }}/lib/shared/providers.dart"
+    type: file
+    source: "lib/shared/providers.dart.j2"
+
 
   # App configuration
   - path: "{{ project_name }}/lib/app.dart"
@@ -251,4 +492,4 @@ hooks:
 
   post_gen:
     script: "scripts/post_gen.sh"
-    description: "Installs packages (graphql_flutter, go_router, provider), sets up GraphQL configuration"
+    description: "Installing packages (graphql_flutter, go_router, provider), sets up GraphQL configuration"

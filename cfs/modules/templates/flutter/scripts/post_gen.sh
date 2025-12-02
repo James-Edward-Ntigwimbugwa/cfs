@@ -15,6 +15,7 @@ echo -e "${BLUE}Setting up Flutter project dependencies...${NC}"
 
 # Get variables from environment
 PROJECT_NAME="${FLUTTER_PROJECT_NAME}"
+# shellcheck disable=SC2034
 API_PROTOCOL="${FLUTTER_API_PROTOCOL:-graphql}"
 
 # Validate project directory
@@ -115,9 +116,9 @@ echo -e "  • GraphQL integration with graphql_flutter"
 echo -e "  • go_router for declarative navigation"
 echo -e "  • Provider for state management"
 echo ""
-echo -e "${YELLOW}Demo Module:${NC}"
-echo -e "  • Users module with full CRUD operations"
-echo -e "  • GraphQL queries and mutations"
+echo -e "${YELLOW}Demo Modules:${NC}"
+echo -e "  • Authentication module with login/signup"
+echo -e "  • Onboarding module with splash screen"
 echo -e "  • Clean architecture (data/presentation/routes)"
 echo ""
 echo -e "${YELLOW}To get started:${NC}"

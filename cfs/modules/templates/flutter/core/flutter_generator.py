@@ -4,12 +4,33 @@ Handles Dart project generation with Flutter conventions.
 """
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Dict, Any, List
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from cfs.modules.templates.flutter.core.exceptions.flutter_generator_error import FlutterGeneratorError
+
+
+def _check_flutter_installed() -> bool:
+    """
+    Check if Flutter is installed and accessible.
+
+    Returns:
+        True if Flutter is installed, False otherwise
+    """
+    try:
+        result = subprocess.run(
+            ['flutter', '--version'],
+            capture_output=True,
+            text=True,
+            timeout=20
+        )
+        return result.returncode == 0
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+
 
 class FlutterGenerator:
     """Generates Flutter projects from templates."""
@@ -131,23 +152,103 @@ class FlutterGenerator:
         except Exception as e:
             raise FlutterGeneratorError(f"Error rendering path '{path_template}': {e}")
 
-    def _check_flutter_installed(self) -> bool:
+    def _process_structure(
+        self,
+        variables: Dict[str, Any],
+        output_dir: Path,
+        force: bool,
+        result: Dict[str, List[str]]
+    ) -> None:
         """
-        Check if Flutter is installed and accessible.
+        Process the manifest 'structure' section and create directories/files.
 
-        Returns:
-            True if Flutter is installed, False otherwise
+        Args:
+            variables: Computed variables
+            output_dir: Output directory
+            force: Overwrite existing files
+            result: Dictionary to track created/skipped files
         """
-        try:
-            result = subprocess.run(
-                ['flutter', '--version'],
-                capture_output=True,
-                text=True,
-                timeout=20
-            )
-            return result.returncode == 0
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            return False
+        structure = self.manifest.get('structure', [])
+
+        if not structure:
+            print("⚠️  Warning: No structure defined in manifest")
+            return
+
+        files_source = self.manifest.get('files_source', 'src_templates')
+        template_files_path = self.template_path / files_source
+
+        for item in structure:
+            item_type = item.get('type')
+            path_template = item.get('path')
+
+            if not path_template:
+                raise FlutterGeneratorError(f"Missing 'path' in structure item: {item}")
+
+            # Render the path
+            rendered_path = self._render_path(path_template, variables)
+            full_path = output_dir / rendered_path
+
+            if item_type == 'dir':
+                # Create directory
+                try:
+                    full_path.mkdir(parents=True, exist_ok=True)
+                    result['created'].append(str(rendered_path))
+                except Exception as e:
+                    raise FlutterGeneratorError(f"Failed to create directory {rendered_path}: {e}")
+
+            elif item_type == 'file':
+                # Get source template
+                source_template = item.get('source')
+                if not source_template:
+                    raise FlutterGeneratorError(
+                        f"Missing 'source' for file: {path_template}\n"
+                        f"Every file in manifest structure must have a 'source' field."
+                    )
+
+                # Check if file exists
+                if full_path.exists() and not force:
+                    result['skipped'].append(str(rendered_path))
+                    continue
+
+                # Ensure parent directory exists
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # Render source template name (for dynamic extensions)
+                source_template = self._render_path(source_template, variables)
+
+                # Check if template file exists
+                template_file_path = template_files_path / source_template
+                if not template_file_path.exists():
+                    raise FlutterGeneratorError(
+                        f"Template file not found: {source_template}\n"
+                        f"Expected at: {template_file_path}\n"
+                        f"For manifest path: {path_template}"
+                    )
+
+                try:
+                    # Load and render the template
+                    template = self.jinja_env.get_template(source_template)
+                    content = template.render(**variables)
+
+                    # Write the file
+                    with open(full_path, 'w', encoding='utf-8') as f:
+                        f.write(content)
+
+                    result['created'].append(str(rendered_path))
+
+                except TemplateNotFound:
+                    raise FlutterGeneratorError(
+                        f"Template not found: {source_template}\n"
+                        f"Expected at: {template_file_path}"
+                    )
+                except Exception as e:
+                    raise FlutterGeneratorError(
+                        f"Error rendering template '{source_template}': {e}"
+                    )
+            else:
+                raise FlutterGeneratorError(
+                    f"Invalid type '{item_type}' in structure. Must be 'dir' or 'file'."
+                )
 
     def _run_flutter_hook(
         self,
@@ -175,7 +276,7 @@ class FlutterGenerator:
         script_path = self.template_path / hook_config.get('script')
 
         if not script_path.exists():
-            print(f"Warning: Flutter hook script not found: {script_path}")
+            print(f"⚠️  Warning: Flutter hook script not found: {script_path}")
             return
 
         description = hook_config.get('description', f'Running {hook_name} hook')
@@ -238,7 +339,7 @@ class FlutterGenerator:
             )
 
         # Check if Flutter is installed
-        if not dry_run and not self._check_flutter_installed():
+        if not dry_run and not _check_flutter_installed():
             raise FlutterGeneratorError(
                 "Flutter is not installed or not in PATH. "
                 "Please install Flutter from https://flutter.dev/docs/get-started/install"
@@ -286,6 +387,13 @@ class FlutterGenerator:
             result['created'].append(str(project_dir))
         except FlutterGeneratorError as e:
             raise FlutterGeneratorError(f"Failed to create Flutter project: {e}")
+
+        # Process structure (create directories and files from templates)
+        if project_dir.exists():
+            try:
+                self._process_structure(all_variables, output_dir, force, result)
+            except FlutterGeneratorError as e:
+                raise FlutterGeneratorError(f"Failed to process structure: {e}")
 
         # Run post-generation hook (installs packages)
         if project_dir.exists():
