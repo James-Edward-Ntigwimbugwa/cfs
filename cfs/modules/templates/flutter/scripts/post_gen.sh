@@ -43,6 +43,16 @@ CORE_PACKAGES=(
     "intl"                # Internationalization
     "flutter_dotenv"      # Environment variables
     "equatable"           # Value equality
+    "toastification"      #toastnotification
+    "flutter_secure_storage" #flutter_secure_storage
+    "sizer"               #sizer_package
+    "hugeicons"           #hugeicons
+    "image_picker"
+    "flutter_platform_widgets"
+    "flutter_spinkit"
+    "syncfusion_flutter_charts"
+    "device_safety_info"
+    "get_it"
 )
 
 # Install core packages

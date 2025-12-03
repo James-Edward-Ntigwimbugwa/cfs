@@ -455,7 +455,6 @@ structure:
     source: "lib/shared/widgets/text_component.dart.j2"
 
 
-
   # Shared - providers
   - path: "{{ project_name }}/lib/shared/providers.dart"
     type: file
@@ -466,6 +465,11 @@ structure:
   - path: "{{ project_name }}/lib/app.dart"
     type: file
     source: "lib/app.dart.j2"
+
+  # App configuration
+  - path: "{{ project_name }}/lib/main.dart"
+    type: file
+    source: "lib/main.dart.j2"
 
   # Environment configuration
   - path: "{{ project_name }}/.env.example"
@@ -492,4 +496,4 @@ hooks:
 
   post_gen:
     script: "scripts/post_gen.sh"
-    description: "Installing packages (graphql_flutter, go_router, provider), sets up GraphQL configuration"
+    description: "Installing packages (graphql_flutter, go_router, provider , http , dio , intl , toastnotification), sets up GraphQL configuration"

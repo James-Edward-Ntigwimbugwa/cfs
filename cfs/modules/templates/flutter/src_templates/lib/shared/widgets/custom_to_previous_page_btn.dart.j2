@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:kiongozi/core/constants/dimensions.dart';
-import 'package:kiongozi/core/theme/modes/app_colors.dart';
+
+import '../../core/constants/dimensions.dart';
+import '../../core/theme/app_colors.dart';
 
 class CustomToPreviousPageBtn extends StatelessWidget {
   const CustomToPreviousPageBtn({super.key});
@@ -14,7 +15,10 @@ class CustomToPreviousPageBtn extends StatelessWidget {
       backgroundColor: AppColors.greenMain,
       child: IconButton(
         onPressed: context.pop,
-        icon: HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01 , strokeWidth: Dimensions.width4,),
+        icon: HugeIcon(
+          icon: HugeIcons.strokeRoundedArrowLeft01,
+          strokeWidth: Dimensions.width4,
+        ),
       ),
     );
   }
