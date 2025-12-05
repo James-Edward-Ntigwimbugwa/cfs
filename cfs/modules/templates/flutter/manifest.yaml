@@ -49,6 +49,11 @@ structure:
     type: dir
 
 
+  - path: "{{ project_name }}/lib/core/api_config/api_parameters.dart"
+    type: file
+    source: "lib/core/api_config/api_parameters.dart.j2"
+
+
   - path: "{{ project_name }}/lib/core/api_config/graphql"
     type: dir
 
@@ -85,15 +90,19 @@ structure:
   - path: "{{ project_name }}/lib/core/enums"
     type: dir
 
-  - path: "{{ project_name }}/lib/core/enums/global_reusable_state.dart.j2"
+  - path: "{{ project_name }}/lib/core/enums/app_theme_enum.dart"
+    type: file
+    source: "lib/core/enums/app_theme_enum.dart.j2"
+
+  - path: "{{ project_name }}/lib/core/enums/global_reusable_state.dart"
     type: file
     source: "lib/core/enums/global_reusable_state.dart.j2"
 
-  - path: "{{ project_name }}/lib/core/enums/graphql_operation_enum.dart.j2"
+  - path: "{{ project_name }}/lib/core/enums/graphql_operation_enum.dart"
     type: file
     source: "lib/core/enums/graphql_operation_enum.dart.j2"
 
-  - path: "{{ project_name }}/lib/core/enums/text_type.dart.j2"
+  - path: "{{ project_name }}/lib/core/enums/text_type.dart"
     type: file
     source: "lib/core/enums/text_type.dart.j2"
 
@@ -360,6 +369,7 @@ structure:
   - path: "{{ project_name }}/lib/shared/utilities/helper_methods/center_right_clipper.dart"
     type: file
     source: "lib/shared/utilities/helper_methods/center_right_clipper.dart.j2"
+
 
   - path: "{{ project_name }}/lib/shared/utilities/helper_methods/date_formatter.dart"
     type: file

@@ -1,10 +1,9 @@
-import 'dart:developer';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../../enums/graphql_operation_enum.dart';
 import '../api_parameters.dart';
-import 'graphlq_url_config.dart';
+import 'graphql_url_config.dart';
 
 class GraphQLOperation {
   static Future<QueryResult> executeOperation(
@@ -46,11 +45,7 @@ class GraphQLOperation {
     String query, {
     Map<String, dynamic>? variables,
   }) {
-    return executeOperation(
-      query,
-      OperationType.query,
-      variables: variables,
-    );
+    return executeOperation(query, OperationType.query, variables: variables);
   }
 
   static Future<QueryResult> performMutation(

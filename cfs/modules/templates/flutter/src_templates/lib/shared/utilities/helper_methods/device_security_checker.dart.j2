@@ -14,14 +14,16 @@ class DeviceSecurityChecker {
       }
       if (!isRealDevice) {
         return SecurityCheckResult.failure(
-            "Device is an emulator or simulator.");
+          "Device is an emulator or simulator.",
+        );
       }
       if (isMockLocation) {
         return SecurityCheckResult.failure("Mock location is enabled.");
       }
       if (isOnExternalStorage) {
         return SecurityCheckResult.failure(
-            "App is installed on external storage.");
+          "App is installed on external storage.",
+        );
       }
       if (isDevelopmentMode) {
         return SecurityCheckResult.failure("Developer mode is enabled.");

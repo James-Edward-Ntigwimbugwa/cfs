@@ -9,11 +9,11 @@ import '../../../../core/constants/dimensions.dart';
 import '../../../../core/injection/dependency_injection.dart';
 import '../../../../core/storage/flutter_secure_storage_keys.dart';
 import '../../../../core/storage/flutter_secure_storage_service.dart';
-import '../../../../core/theme/modes/app_colors.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/custom_button.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../../authentication/routes/authentication_paths.dart';
-import '../providers/onboarding_provider.dart';
+import '../providers/on_boarding_provider.dart' show OnboardingProvider;
 import 'page_four.dart';
 import 'page_one.dart';
 import 'page_three.dart';
@@ -29,12 +29,11 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   static final PageController _pageController = PageController();
   final List<Widget> pages = [
-    PageOne(pageController: _pageController,),
+    PageOne(pageController: _pageController),
     PageTwo(pageController: _pageController),
     PageThree(pageController: _pageController),
-    PageFour(pageController: _pageController)
+    PageFour(pageController: _pageController),
   ];
-
 
   @override
   void dispose() {
@@ -63,7 +62,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
               ),
-          
+
               // Indicator + Button
               Positioned(
                 bottom: 40,
@@ -85,77 +84,88 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     SizedBox(height: Dimensions.height16),
                     onBoardingProvider.currentPage == pages.length - 1
                         ? CustomButton(
-                      borderRadius: 30,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: Dimensions.width56,
-                      ),
-                      onPressed: () async{
-                        final secureStorage = getIt<FlutterSecureStorageService>();
-                        await secureStorage.saveItem(key: FlutterSecureStorageKeys.isFirstAppLaunch, value: "no");
-                        context.go(AuthenticationPaths.login);
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text("Get Started"),
-                          const SizedBox(width: 12),
-                          // Animated arrows
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(3, (index) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 2.0,
-                                ),
-                                child: HeroIcon(
-                                  HeroIcons.chevronRight,
-                                  size: 20,
-                                  color: Colors.white,
-                                )
-                                    .animate(
-                                  onPlay: (controller) =>
-                                      controller.repeat(),
-                                )
-                                    .fadeIn(
-                                  delay: Duration(
-                                    milliseconds: 100 * index,
-                                  ),
-                                )
-                                    .then()
-                                    .moveX(
-                                    begin: 0,
-                                    end: 8,
-                                    duration: 500.ms)
-                                    .then()
-                                    .moveX(
-                                    begin: 8,
-                                    end: 0,
-                                    duration: 500.ms),
+                            borderRadius: 30,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: Dimensions.width56,
+                            ),
+                            onPressed: () async {
+                              final secureStorage =
+                                  getIt<FlutterSecureStorageService>();
+                              await secureStorage.saveItem(
+                                key: FlutterSecureStorageKeys.isFirstAppLaunch,
+                                value: "no",
                               );
-                            }),
-                          ),
-                        ],
-                      ),
-                    )
+                              context.go(AuthenticationPaths.login);
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text("Get Started"),
+                                const SizedBox(width: 12),
+                                // Animated arrows
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: List.generate(3, (index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 2.0,
+                                      ),
+                                      child:
+                                          HeroIcon(
+                                                HeroIcons.chevronRight,
+                                                size: 20,
+                                                color: Colors.white,
+                                              )
+                                              .animate(
+                                                onPlay: (controller) =>
+                                                    controller.repeat(),
+                                              )
+                                              .fadeIn(
+                                                delay: Duration(
+                                                  milliseconds: 100 * index,
+                                                ),
+                                              )
+                                              .then()
+                                              .moveX(
+                                                begin: 0,
+                                                end: 8,
+                                                duration: 500.ms,
+                                              )
+                                              .then()
+                                              .moveX(
+                                                begin: 8,
+                                                end: 0,
+                                                duration: 500.ms,
+                                              ),
+                                    );
+                                  }),
+                                ),
+                              ],
+                            ),
+                          )
                         : CustomButton(
-                      onPressed: (){
-                        onBoardingProvider.nextPage(_pageController);
-                      },
-                      borderRadius: 30,
-                      padding: EdgeInsets.symmetric(horizontal: Dimensions.width192),
-                      child: const Text(
-                        "Next",
-                        style: TextStyle(
-                            color: Colors.white, fontSize: 16),
-                      ),
-                    ),
+                            onPressed: () {
+                              onBoardingProvider.nextPage(_pageController);
+                            },
+                            borderRadius: 30,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: Dimensions.width192,
+                            ),
+                            child: const Text(
+                              "Next",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
                   ],
                 ),
               ),
             ],
           ),
         );
-      }
+      },
     );
   }
 }

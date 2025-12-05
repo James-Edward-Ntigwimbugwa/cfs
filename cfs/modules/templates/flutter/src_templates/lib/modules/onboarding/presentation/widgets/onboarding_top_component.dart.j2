@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/dimensions.dart';
-import '../../../../core/theme/modes/app_colors.dart';
-import '../../../../gen/assets.gen.dart';
-import '../providers/onboarding_provider.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../providers/on_boarding_provider.dart';
 
 class OnboardingTopComponent extends StatelessWidget {
   final PageController controller;
@@ -16,7 +15,10 @@ class OnboardingTopComponent extends StatelessWidget {
     return Consumer<OnboardingProvider>(
       builder: (context, provider, child) {
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: Dimensions.width8, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: Dimensions.width8,
+            vertical: 8,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -24,7 +26,17 @@ class OnboardingTopComponent extends StatelessWidget {
               Row(
                 spacing: 4,
                 children: [
-                  Assets.images.bibinabwana.image(height: 20),
+                  Image.network(
+                    'https://via.placeholder.com/50x50.png?text=Kiongozi', // Placeholder network image
+                    height: 20,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2));
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.error, size: 20, color: AppColors.greenMain);
+                    },
+                  ),
                   Text(
                     "Kiongozi ",
                     style: theme.textTheme.titleMedium!.copyWith(
@@ -43,25 +55,24 @@ class OnboardingTopComponent extends StatelessWidget {
               ),
 
               // Skip button (hide on last page)
-              if (provider.currentPage != provider.totalPages - 1)
-                ...[
-                  GestureDetector(
-                    onTap: (){
-                      provider.skipToLastPage(controller);
-                    },
-                    child: Text(
-                      "Skip",
-                      style: theme.textTheme.bodyMedium!.copyWith(
-                        color: AppColors.greenMain,
-                        fontWeight: FontWeight.bold,
-                      ),
+              if (provider.currentPage != provider.totalPages - 1) ...[
+                GestureDetector(
+                  onTap: () {
+                    provider.skipToLastPage(controller);
+                  },
+                  child: Text(
+                    "Skip",
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      color: AppColors.greenMain,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
+                ),
+              ],
             ],
           ),
         );
-      }
+      },
     );
   }
 }

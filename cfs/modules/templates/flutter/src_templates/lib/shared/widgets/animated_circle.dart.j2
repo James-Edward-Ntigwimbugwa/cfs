@@ -26,11 +26,12 @@ class _AnimatedCircleState extends State<AnimatedCircle>
   @override
   void initState() {
     super.initState();
-    _controller =
-    AnimationController(vsync: this, duration: widget.duration)..forward();
-    _animation = Tween<double>(begin: 0.0, end: widget.size).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration)
+      ..forward();
+    _animation = Tween<double>(
+      begin: 0.0,
+      end: widget.size,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
   @override

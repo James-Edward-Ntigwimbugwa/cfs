@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../enums/app_theme.dart';
+import '../../enums/ap_theme_enum.dart';
 import '../../injection/dependency_injection.dart';
 import '../../storage/flutter_secure_storage_keys.dart';
 import '../../storage/flutter_secure_storage_service.dart';
@@ -11,7 +11,7 @@ class ThemeController extends ChangeNotifier {
   AppThemeMode _themeMode = AppThemeMode.system;
 
   ThemeController() {
-    _loadThemeOnInit(); // ✅ automatically load theme when constructed
+    _loadThemeOnInit(); 
   }
 
   AppThemeMode get themeMode => _themeMode;
@@ -50,11 +50,15 @@ class ThemeController extends ChangeNotifier {
 
   /// Loads theme from secure storage
   Future<void> loadTheme() async {
-    final saved = await _secureStorage.getItem(key: FlutterSecureStorageKeys.themeKey);
+    final saved = await _secureStorage.getItem(
+      key: FlutterSecureStorageKeys.themeKey,
+    );
     if (saved != null) {
       try {
-        _themeMode = AppThemeMode.values
-            .firstWhere((mode) => mode.name == saved, orElse: () => AppThemeMode.system);
+        _themeMode = AppThemeMode.values.firstWhere(
+          (mode) => mode.name == saved,
+          orElse: () => AppThemeMode.system,
+        );
       } catch (_) {
         _themeMode = AppThemeMode.system;
       }

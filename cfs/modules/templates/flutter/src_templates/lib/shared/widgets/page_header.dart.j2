@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
-import 'package:kiongozi/core/constants/dimensions.dart';
-import 'package:kiongozi/core/mixins/app_localization_mixin.dart';
 
+import '../../core/constants/dimensions.dart';
 import '../../core/enums/text_type.dart';
 import 'custom_text.dart';
 
@@ -28,8 +27,7 @@ class BuildPageHeader extends StatefulWidget {
   State<BuildPageHeader> createState() => _BuildPageHeaderState();
 }
 
-class _BuildPageHeaderState extends State<BuildPageHeader>
-    with LocalizationMixin {
+class _BuildPageHeaderState extends State<BuildPageHeader> {
   @override
   Widget build(BuildContext context) {
     return Column(

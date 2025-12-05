@@ -21,7 +21,7 @@ class GraphQLConfig {
   static Future<GraphQLClient> initializeClient() async {
     HttpLink httpLink = HttpLink(
       gqlServerUrl,
-      defaultHeaders:  {},
+      defaultHeaders: {},
       httpClient: TimeoutHttpClient(),
     );
     final AuthSecureStorageDataSource secureStorage =

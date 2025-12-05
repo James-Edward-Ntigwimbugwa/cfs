@@ -8,9 +8,7 @@ import 'package:toastification/toastification.dart';
 import '../../../../core/injection/dependency_injection.dart';
 import '../../../../core/storage/flutter_secure_storage_keys.dart';
 import '../../../../core/storage/flutter_secure_storage_service.dart';
-import '../../../../core/theme/modes/app_colors.dart';
-import '../../../../gen/assets.gen.dart';
-import '../../../home/routes/home_paths.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../routes/onboarding_paths.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -34,7 +32,10 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> navigateToNextPage() async {
     final secureStorage = getIt<FlutterSecureStorageService>();
     String isFirstTimeLaunch =
-        await secureStorage.getItem(key: FlutterSecureStorageKeys.isFirstAppLaunch) ?? "yes";
+        await secureStorage.getItem(
+          key: FlutterSecureStorageKeys.isFirstAppLaunch,
+        ) ??
+        "yes";
 
     // If blockInsecureDevice is true → show toast and quit app
     if (widget.blockInsecureDevice) {
@@ -44,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
           title: const Text("Security Warning"),
           description: const Text(
             "App can’t run on rooted devices, emulators, or with developer options enabled.\n"
-                "Please use a physical device without root privileges and dev options off.",
+            "Please use a physical device without root privileges and dev options off.",
           ),
           type: ToastificationType.error,
           style: ToastificationStyle.fillColored,
@@ -68,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (isFirstTimeLaunch == "yes") {
         context.go(OnboardingPaths.onBoardingScreen);
       } else {
-        context.go(HomePaths.home);
+        // context.go(HomePaths.home);
       }
     });
   }
@@ -91,11 +92,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     AppColors.greenMain,
                     value,
                   )!,
-                  Color.lerp(
-                    Colors.white,
-                    AppColors.tealGreen,
-                    value,
-                  )!,
+                  Color.lerp(Colors.white, AppColors.tealGreen, value)!,
                 ],
               ),
             ),
@@ -107,23 +104,31 @@ class _SplashScreenState extends State<SplashScreen> {
           spacing: 16,
           children: [
             Center(
-              child: Assets.images.bibinabwana
-                  .image(scale: 12)
-                  .animate()
-                  .scale(duration: const Duration(seconds: 3)),
+              child: Image.network(
+                'https://via.placeholder.com/300x200.png?text=Kiongozi+App', // Placeholder network image
+                scale: 12,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(child: CircularProgressIndicator());
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(Icons.error, size: 100, color: Colors.white);
+                },
+              ).animate().scale(duration: const Duration(seconds: 3)),
             ),
             Align(
               alignment: Alignment.center,
-              child: Text(
-                "KIONGOZI APP",
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                ),
-              ).animate().fadeIn(
-                delay: const Duration(seconds: 3),
-                duration: const Duration(seconds: 1),
-              ),
+              child:
+                  Text(
+                    "KIONGOZI APP",
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ).animate().fadeIn(
+                    delay: const Duration(seconds: 3),
+                    duration: const Duration(seconds: 1),
+                  ),
             ),
           ],
         ),

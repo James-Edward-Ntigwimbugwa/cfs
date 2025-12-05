@@ -96,7 +96,11 @@ class AuthSecureStorageDataSourceImpl implements AuthSecureStorageDataSource {
     );
     if (authResponse != null) {
       final authData = jsonDecode(authResponse);
-      return {'username': authData['username'], 'userUid': authData['userUid'] , 'userId' : authData['userId']};
+      return {
+        'username': authData['username'],
+        'userUid': authData['userUid'],
+        'userId': authData['userId'],
+      };
     }
     return null;
   }

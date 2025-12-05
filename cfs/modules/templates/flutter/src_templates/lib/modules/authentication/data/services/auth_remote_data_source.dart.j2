@@ -1,11 +1,10 @@
 import 'package:http/http.dart';
+import '../../../../core/api_config/rest/rest_api_service.dart';
 
-import '../../../../core/api_config/rest_api/rest_api_service.dart';
 
 class AuthRemoteDataSource {
   final apiService = RestApiService();
-  
-  
+
   //
   Future<Response> userLoginService({
     required String username,

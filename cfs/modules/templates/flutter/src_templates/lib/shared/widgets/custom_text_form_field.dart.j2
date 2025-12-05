@@ -22,11 +22,13 @@ class CustomInputField extends StatefulWidget {
   final bool? obscureText;
   final bool allowPreviousDates;
   final FormFieldValidator<String?> validator;
+  final IconData? suffixIcon;
 
   // ✅ Background color
   final Color? bgColor;
   final Color? borderColor;
   final Color? textColor;
+  final Widget? prefixIcon;
 
   // Input pickers
   final bool isDatePicker;
@@ -46,6 +48,7 @@ class CustomInputField extends StatefulWidget {
     required this.validator,
     required this.controller,
     this.keyboardType,
+    this.prefixIcon,
     this.maxLength,
     this.contentPadding,
     this.fieldPadding,
@@ -58,6 +61,7 @@ class CustomInputField extends StatefulWidget {
     this.bgColor,
     this.borderColor,
     this.textColor,
+    this.suffixIcon,
   });
 
   @override

@@ -86,21 +86,31 @@ class CustomTextField extends StatelessWidget {
           maxLength: maxLength,
           keyboardType: keyboardType,
           obscureText: obscureText,
-          style: textStyle ?? TextStyle(
-            color: textColor ?? colorScheme.onSurface,
-            fontSize: Dimensions.fontSize14,
-          ),
+          style:
+              textStyle ??
+              TextStyle(
+                color: textColor ?? colorScheme.onSurface,
+                fontSize: Dimensions.fontSize14,
+              ),
           decoration: InputDecoration(
             labelText: labelText,
-            labelStyle: labelStyle ?? TextStyle(
-              color: labelColor ?? colorScheme.onSurface.withValues(alpha: 0.7),
-              fontSize: Dimensions.fontSize14,
-            ),
+            labelStyle:
+                labelStyle ??
+                TextStyle(
+                  color:
+                      labelColor ??
+                      colorScheme.onSurface.withValues(alpha: 0.7),
+                  fontSize: Dimensions.fontSize14,
+                ),
             hintText: hintText,
-            hintStyle: hintStyle ?? TextStyle(
-              color: hintColor ?? (isDark ? Colors.grey[500] : Colors.grey[400]),
-              fontSize: Dimensions.fontSize14,
-            ),
+            hintStyle:
+                hintStyle ??
+                TextStyle(
+                  color:
+                      hintColor ??
+                      (isDark ? Colors.grey[500] : Colors.grey[400]),
+                  fontSize: Dimensions.fontSize14,
+                ),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             filled: true,
@@ -110,17 +120,13 @@ class CustomTextField extends StatelessWidget {
               borderRadius: BorderRadius.circular(
                 borderRadius ?? Dimensions.radius20,
               ),
-              borderSide: BorderSide(
-                color: borderColor ?? defaultBorderColor,
-              ),
+              borderSide: BorderSide(color: borderColor ?? defaultBorderColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 borderRadius ?? Dimensions.radius20,
               ),
-              borderSide: BorderSide(
-                color: borderColor ?? defaultBorderColor,
-              ),
+              borderSide: BorderSide(color: borderColor ?? defaultBorderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
@@ -143,23 +149,20 @@ class CustomTextField extends StatelessWidget {
               borderRadius: BorderRadius.circular(
                 borderRadius ?? Dimensions.radius20,
               ),
-              borderSide: BorderSide(
-                color: colorScheme.error,
-              ),
+              borderSide: BorderSide(color: colorScheme.error),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
                 borderRadius ?? Dimensions.radius20,
               ),
-              borderSide: BorderSide(
-                color: colorScheme.error,
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: colorScheme.error, width: 1.5),
             ),
-            contentPadding: contentPadding ?? EdgeInsets.symmetric(
-              horizontal: Dimensions.width20,
-              vertical: Dimensions.height16,
-            ),
+            contentPadding:
+                contentPadding ??
+                EdgeInsets.symmetric(
+                  horizontal: Dimensions.width20,
+                  vertical: Dimensions.height16,
+                ),
           ),
           onChanged: onChanged,
         ),
