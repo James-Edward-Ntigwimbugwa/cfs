@@ -1,0 +1,32 @@
+import 'package:flutter/material.dart';
+
+class CenterRightCircleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    // left-top
+    path.moveTo(0, 0);
+    // top-right curve
+    path.quadraticBezierTo(
+      size.width,
+      size.height * 0.25,
+      size.width,
+      size.height * 0.5,
+    );
+    // bottom-right curve
+    path.quadraticBezierTo(
+      size.width,
+      size.height * 0.75,
+      size.width * 0.7,
+      size.height,
+    );
+    // bottom-left
+    path.lineTo(0, size.height);
+    // close path
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
