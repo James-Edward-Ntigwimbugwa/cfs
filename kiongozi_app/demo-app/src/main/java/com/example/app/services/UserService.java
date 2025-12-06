@@ -1,0 +1,22 @@
+package com.example.app.services;
+import com.example.app.models.User;
+import com.example.app.dtos.UserDTO;
+import com.example.app.dtos.UserResponseDTO;
+
+import java.util.List;
+
+/**
+ * Example service placeholder. This interface should be implemented by the service-implementation layer.
+ It only serves as a template for defining business-logic methods.
+ */
+
+
+import java.util.List;
+
+public interface UserService {
+    List<UserResponseDTO> findAllUsers();
+    UserResponseDTO findById(Long id);
+    UserResponseDTO createUser(UserDTO userDTO);
+    UserResponseDTO updateUser(Long id, UserDTO userDTO);
+    void deleteUser(Long id);
+}

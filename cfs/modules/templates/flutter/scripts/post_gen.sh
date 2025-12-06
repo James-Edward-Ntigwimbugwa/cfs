@@ -43,16 +43,21 @@ CORE_PACKAGES=(
     "intl"                # Internationalization
     "flutter_dotenv"      # Environment variables
     "equatable"           # Value equality
-    "toastification"      #toastnotification
-    "flutter_secure_storage" #flutter_secure_storage
-    "sizer"               #sizer_package
-    "hugeicons"           #hugeicons
-    "image_picker"
-    "flutter_platform_widgets"
-    "flutter_spinkit"
-    "syncfusion_flutter_charts"
-    "device_safety_info"
-    "get_it"
+    "toastification"      # Toast notification
+    "flutter_secure_storage" # Flutter secure storage
+    "sizer"               # Sizer package
+    "hugeicons"           # Huge icons
+    "image_picker"        # Image picker
+    "flutter_platform_widgets" # Flutter platform widgets
+    "flutter_spinkit"     # Flutter spinkit
+    "syncfusion_flutter_charts" # Syncfusion Flutter charts
+    "device_safety_info"  # Device safety info
+    "get_it"              # Get it
+    "heroicons"           # Hero icons
+    "flutter_animate"     # Flutter animate
+    "dio"                 # Dio
+    "http"                # HTTP
+    "smooth_page_indicator" # Smooth page indicator
 )
 
 # Install core packages

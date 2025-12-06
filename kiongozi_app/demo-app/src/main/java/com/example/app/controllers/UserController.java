@@ -1,0 +1,97 @@
+// ============= UserController.java =============
+package com.example.app.controllers;
+
+
+import com.example.app.dtos.UserDTO;
+import com.example.app.dtos.UserResponseDTO;
+import com.example.app.services.UserService;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+/**
+ * User Controller for demoapp
+ * API Protocol: rest
+ *
+ * This controller handles HTTP requests for user-related operations.
+ */
+@RestController
+@RequestMapping("/api/users")
+@Slf4j
+public class UserController {
+
+    @Autowired
+    private UserService service;
+
+    /**
+     * Get all users
+     *
+     * @return List of all users
+     */
+    @GetMapping
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        log.info("GET /api/users - Fetching all users");
+        List<UserResponseDTO> users = service.findAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    /**
+     * Get user by ID
+     *
+     * @param id User ID
+     * @return User object
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        log.info("GET /api/users/{} - Fetching user by id", id);
+        UserResponseDTO user = service.findById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    /**
+     * Create a new user
+     *
+     * @param userDTO User data transfer object
+     * @return Created user
+     */
+    @PostMapping
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+        log.info("POST /api/users - Creating new user: {}", userDTO.getUsername());
+        UserResponseDTO createdUser = service.createUser(userDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    }
+
+    /**
+     * Update an existing user
+     *
+     * @param id User ID
+     * @param userDTO User data transfer object
+     * @return Updated user
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserDTO userDTO) {
+        log.info("PUT /api/users/{} - Updating user", id);
+        UserResponseDTO updatedUser = service.updateUser(id, userDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    /**
+     * Delete a user
+     *
+     * @param id User ID
+     * @return No content
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        log.info("DELETE /api/users/{} - Deleting user", id);
+        service.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+}

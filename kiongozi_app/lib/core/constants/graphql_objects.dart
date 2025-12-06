@@ -1,0 +1,30 @@
+const String defaultResponseObjectString = '''
+  response{
+      code
+      message
+      success
+    }
+''';
+
+const String defaultBodyResponseObject = '''
+  data {
+        id
+        uniqueId
+        name
+        code
+      }
+''';
+
+const String defaultPageObjectString = '''
+  page {
+    number
+    hasNextPage
+    hasPreviousPage
+    currentPageNumber
+    nextPageNumber
+    previousPageNumber
+    numberOfPages
+    totalElements
+    pagesNumberArray
+  }
+''';
