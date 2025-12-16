@@ -69,7 +69,6 @@ CORE_PACKAGES=(
     "django-debug-toolbar" #debugger
     "django-oauth-toolkit" #oauth2
     "Jinja2" #Python Jinja
-    "graphene-django"
 )
 
 for package in "${CORE_PACKAGES[@]}"; do
