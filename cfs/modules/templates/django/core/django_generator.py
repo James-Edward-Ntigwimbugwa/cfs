@@ -36,7 +36,6 @@ class DjangoGenerator:
     def __init__(self, template_path: Path):
         """
         Initialize the Django generator.
-        Initialize the Django generator.
 
         Args:
             template_path: Path to the Django template directory
@@ -150,12 +149,13 @@ class DjangoGenerator:
     ) -> None:
         """
         Process the manifest 'structure' section and create directories/files.
+        Always overwrites existing files with new template data.
 
         Args:
             variables: Computed variables
             output_dir: Output directory
-            force: Overwrite existing files
-            result: Dictionary to track created/skipped files
+            force: Overwrite existing files (always True in effect)
+            result: Dictionary to track created/updated files
         """
         structure = self.manifest.get('structure', [])
 
@@ -194,11 +194,6 @@ class DjangoGenerator:
                         f"Every file in manifest structure must have a 'source' field."
                     )
 
-                # Check if file exists
-                if full_path.exists() and not force:
-                    result['skipped'].append(str(rendered_path))
-                    continue
-
                 # Ensure parent directory exists
                 full_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -219,7 +214,7 @@ class DjangoGenerator:
                     template = self.jinja_env.get_template(source_template)
                     content = template.render(**variables)
 
-                    # Write the file
+                    # Always write the file (overwrite if exists)
                     with open(full_path, 'w', encoding='utf-8') as f:
                         f.write(content)
 
@@ -312,11 +307,12 @@ class DjangoGenerator:
     ) -> Dict[str, List[str]]:
         """
         Generate the Django project structure.
+        Files are always overwritten with new template data.
 
         Args:
             variables: User-provided variable values
             output_dir: Directory to create the project in
-            force: Overwrite existing files
+            force: Overwrite existing files (always True in effect)
             dry_run: Show what would be created without creating it
 
         Returns:
@@ -365,13 +361,6 @@ class DjangoGenerator:
             print(f"  Celery: {all_variables.get('use_celery')}")
             return result
 
-        # Check if project already exists
-        if project_dir.exists() and not force:
-            raise DjangoGeneratorError(
-                f"Project directory already exists: {project_dir}\n"
-                "Use --force to overwrite."
-            )
-
         # Run pre-generation hook (creates Django project and apps)
         try:
             self._run_django_hook('pre_gen', all_variables, output_dir)
@@ -380,9 +369,10 @@ class DjangoGenerator:
             raise DjangoGeneratorError(f"Failed to create Django project: {e}")
 
         # Process structure (create directories and files from templates)
+        # Always overwrites existing files
         if project_dir.exists():
             try:
-                self._process_structure(all_variables, output_dir, force, result)
+                self._process_structure(all_variables, output_dir, True, result)
             except DjangoGeneratorError as e:
                 raise DjangoGeneratorError(f"Failed to process structure: {e}")
 

@@ -54,6 +54,10 @@ CORE_PACKAGES=(
     "python-dotenv"
     "django_celery_beat"
     "ldap3"
+    "django-oauth-toolkit"
+    "debug_toolbar"
+    "django-debug-toolbar"
+    "jinja2"
 
     "celery[redis]"  # Celery with Redis transport
     "redis"          # Redis client (often used by Celery)
@@ -61,6 +65,7 @@ CORE_PACKAGES=(
     "weasyprint"     # HTML to PDF generation
     "xmltodict"      # XML to dictionary conversion
     "pyAesCrypt"     # AES file encryption
+    "graphene-django"
 )
 for package in "${CORE_PACKAGES[@]}"; do
     echo -e "  ${YELLOW}→${NC} Installing $package..."
