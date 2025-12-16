@@ -218,7 +218,7 @@ structure:
     type: file
     source: "__init__.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_backend/{{ package_name}}_logs/debug.log"
+  - path: "{{ project_name }}/{{ package_name }}_backend/logs/debug.log"
     type: file
     source: "backend/logs/debug.log.j2"
 
@@ -767,7 +767,7 @@ structure:
   - path: "{{ project_name }}/logs"
     type: dir
 
-  - path: "{{ project_name }}/logs/debug.log"
+  - path: "{{ project_name }}/{{package_name}}_logs/debug.log"
     type: file
     source: "logs/debug.log.j2"
 
