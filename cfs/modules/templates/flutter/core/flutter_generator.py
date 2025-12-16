@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Any, List
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
-from cfs.modules.templates.flutter.core.exceptions.flutter_generator_error import FlutterGeneratorError
+from cfs.modules.templates.flutter.core.exceptions.flutter_exceptions import FlutterGeneratorError
 
 
 def _check_flutter_installed() -> bool:

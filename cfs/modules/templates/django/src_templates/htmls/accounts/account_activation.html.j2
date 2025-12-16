@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ subject }}</title>
-    <!--[if !mso]><!-->
     <style>
       :root {
         --primary-green: #1a4d2e;
@@ -245,43 +244,37 @@
         }
       }
     </style>
-    <!--<![endif]-->
-  </head>
+    </head>
+
   <body style="font-family: Georgia, serif; background-color: #e8e6e0; margin: 0; padding: 0;">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #e8e6e0; font-family: Georgia, serif;">
       <tr>
         <td style="padding: 50px 20px;">
           <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" border="0" width="650" style="max-width: 650px; margin: 0 auto; background: #ffffff; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);">
 
-            <!-- Wrapper with border -->
             <tr>
               <td class="email-wrapper" style="border: 4px double #c9a647; background: #ffffff;">
 
-                <!-- Header Ornament -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
                     <td class="header-ornament" style="height: 8px; background: linear-gradient(to right, #1a4d2e 0%, #c9a647 50%, #1a4d2e 100%); background-color: #c9a647;"></td>
                   </tr>
                 </table>
 
-                <!-- Header -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
                     <td class="email-header" style="background: linear-gradient(to bottom, #0f3d1f, #1a4d2e); background-color: #1a4d2e; text-align: center; padding: 40px 30px 55px; position: relative;">
 
-                      <!-- Logo Container -->
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="120" style="margin: 0 auto 20px;">
                         <tr>
                           <td class="logo-container" style="background: #ffffff; width: 120px; height: 120px; border-radius: 60px; text-align: center; vertical-align: middle; border: 4px solid #c9a647; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
-                            <img src="{{ logo_url|default:'https://nishatisafi.all.tz/assets/images/logo-cropped.svg' }}" alt="{{ logo_alt|default:'{{ package_name | replace('_', ' ') | upper }} Subsidy Logo' }}" class="email-logo" width="85" style="display: inline-block; max-width: 85px; height: auto; vertical-align: middle;" />
+                            <img src="{{ logo_url|default('https://nishatisafi.all.tz/assets/images/logo-cropped.svg') }}" alt="{{ logo_alt|default('Subsidy Logo') }}" class="email-logo" width="85" style="display: inline-block; max-width: 85px; height: auto; vertical-align: middle;" />
                           </td>
                         </tr>
                       </table>
 
-                      <!-- Title -->
                       <h1 class="email-title" style="color: #d4af37; font-size: 28px; margin: 0; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-family: Georgia, serif;">{{ subject }}</h1>
 
-                      <!-- Decorative Divider -->
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="120" style="margin: 20px auto 0;">
                         <tr>
                           <td class="decorative-divider" style="height: 2px; background: #d4af37; position: relative; text-align: center;">
@@ -295,36 +288,25 @@
                   </tr>
                 </table>
 
-                <!-- Body -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
                     <td class="email-body" style="padding: 60px 50px 50px; color: #2b2b2b; line-height: 1.9; background: #faf7f0; font-family: Georgia, serif;">
 
-                      <p class="greeting" style="color: #1a4d2e; font-size: 22px; margin: 0 0 25px 0; font-weight: 600; font-style: italic;">Dear {{ user_full_name|default:'Valued Partner' }},</p>
+                      <p class="greeting" style="color: #1a4d2e; font-size: 22px; margin: 0 0 25px 0; font-weight: 600; font-style: italic;">Dear {{ user_full_name|default('Valued Partner') }},</p>
 
                       <p style="margin: 20px 0; font-size: 16px; text-align: justify; color: #2b2b2b; line-height: 1.9;">{{ message }}</p>
 
                       {% if action_label and front_end_url %}
-                      <!-- Button Wrapper -->
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="button-wrapper" style="margin: 40px 0 30px; padding: 30px 0; border-top: 1px solid #e8d7a5; border-bottom: 1px solid #e8d7a5;">
                         <tr>
                           <td style="text-align: center;">
-                            <!--[if mso]>
-                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ front_end_url }}" style="height:52px;v-text-anchor:middle;width:200px;" arcsize="8%" strokecolor="#c9a647" strokeweight="3px" fillcolor="#c9a647">
-                              <w:anchorlock/>
-                              <center style="color:#0f3d1f;font-family:Georgia;font-size:15px;font-weight:bold;text-transform:uppercase;letter-spacing:1.5px;">{{ action_label }}</center>
-                            </v:roundrect>
-                            <![endif]-->
-                            <!--[if !mso]><!-->
                             <a href="{{ front_end_url }}" class="email-button" style="display: inline-block; background: linear-gradient(135deg, #c9a647, #d4af37); background-color: #c9a647; color: #0f3d1f; padding: 16px 40px; border: 3px solid #c9a647; text-decoration: none; font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 1.5px; border-radius: 4px; font-family: Georgia, serif; mso-hide: all;">{{ action_label }}</a>
-                            <!--<![endif]-->
-                          </td>
+                            </td>
                         </tr>
                       </table>
                       {% endif %}
 
                       {% if action_link %}
-                      <!-- Link Section -->
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" class="link-section" style="margin-top: 35px;">
                         <tr>
                           <td style="padding: 20px; background: #ffffff; border-left: 4px solid #c9a647; border-radius: 4px;">
@@ -339,14 +321,12 @@
                   </tr>
                 </table>
 
-                <!-- Footer -->
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
                     <td class="email-footer" style="background: linear-gradient(to bottom, #1a4d2e, #0f3d1f); background-color: #1a4d2e; text-align: center; padding: 35px 30px; color: #e8d7a5; font-size: 13px; font-family: Georgia, serif;">
 
-                      <p class="footer-brand" style="font-size: 16px; font-weight: 700; letter-spacing: 1.5px; color: #d4af37; margin: 0 0 5px 0;">{{ platform_name|default:'{{ package_name | replace('_', ' ') | upper }} SUBSIDY PLATFORM'|upper|replace('_', ' ') }}</p>
+                      <p class="footer-brand" style="font-size: 16px; font-weight: 700; letter-spacing: 1.5px; color: #d4af37; margin: 0 0 5px 0;">{{ platform_name|default('SUBSIDY PLATFORM') }}</p>
 
-                      <!-- Footer Divider -->
                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="60" style="margin: 15px auto;">
                         <tr>
                           <td class="footer-divider" style="height: 2px; background: #d4af37;"></td>
@@ -355,7 +335,7 @@
 
                       <p style="margin: 10px 0; line-height: 1.6; color: #e8d7a5;">© {{ current_year }} All Rights Reserved</p>
                       <p style="margin: 20px 0 10px 0; line-height: 1.6; color: #e8d7a5;">
-                        Questions or concerns? <a href="mailto:{{ support_email|default:'support@nishatisafi.all.tz' }}" class="footer-link" style="color: #d4af37; text-decoration: none; font-weight: 600;">Contact Our Support Team</a>
+                        Questions or concerns? <a href="mailto:{{ support_email|default('support@nishatisafi.all.tz') }}" class="footer-link" style="color: #d4af37; text-decoration: none; font-weight: 600;">Contact Our Support Team</a>
                       </p>
 
                     </td>

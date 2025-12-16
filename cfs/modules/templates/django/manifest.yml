@@ -10,7 +10,7 @@ variables:
   project_name:
     type: string
     prompt: "Project name (used for directory name)"
-    default: "django_backend"
+    default: "demo_backend"
     validation: "^[a-z][a-z0-9_]*$"
 
   package_name:
@@ -92,13 +92,6 @@ structure:
   # ============================================================
   # 1. ASSETS APP - Static and configuration assets
   # ============================================================
-  - path: "{{ project_name }}/{{ package_name }}_assets"
-    type: dir
-
-  - path: "{{ project_name }}/{{ package_name }}_assets/__init__.py"
-    type: file
-    source: "__init__.py.j2"
-
   - path: "{{ project_name }}/{{ package_name }}_assets/locations"
     type: dir
 
@@ -214,7 +207,7 @@ structure:
   - path: "{{ project_name }}/{{ package_name }}_backend"
     type: dir
 
-  - path: "{{ project_name }}/{{ package_name }}_backend/__init__.py"
+  - path: "{{ project_name }}/{{ package_name }}_backend/"
     type: file
     source: "__init__.py.j2"
 
@@ -225,7 +218,7 @@ structure:
     type: file
     source: "__init__.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_backend/logs/debug.log"
+  - path: "{{ project_name }}/{{ package_name }}_backend/{{ package_name}}_logs/debug.log"
     type: file
     source: "backend/logs/debug.log.j2"
 
@@ -285,7 +278,7 @@ structure:
 
   - path: "{{ project_name }}/{{ package_name }}_cache_core/signals.py"
     type: file
-    source: "cache_core/cache_core_signals.py.j2"
+    source: "cache_core/signals.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_cache_core/tests.py"
     type: file
@@ -318,7 +311,7 @@ structure:
 
   - path: "{{ project_name }}/{{ package_name }}_cache_core/management/commands/list_all_models.py"
     type: file
-    source: "apps/commands/list_all_models.py.j2"
+    source: "cache_core/management/commands/list_all_models.py.j2"
 
   # ============================================================
   # 6. DTO - Data Transfer Objects
@@ -330,9 +323,13 @@ structure:
     type: file
     source: "__init__.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_dto/audit_logs_dto.py"
+  - path: "{{ project_name }}/{{ package_name }}_dto/accounts_dto.py"
     type: file
     source: "dto/audit_logs_dto.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/audit_logs_dto.py"
+    type: file
+    source: "dto/accounts_dto.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_dto/auth_dto.py"
     type: file
@@ -369,13 +366,13 @@ structure:
     source: "__init__.py.j2"
 
 
-  - path: "{{ project_name }}/{{ package_name }}_dto_builders/audit_logs_dto.py"
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders/accounts_builder.py"
     type: file
     source: "dto_builders/accounts_builder.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_dto_builders/audit_logs_dto.py"
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders/audit_logs_builder.py"
     type: file
-    source: "dto_builders/audit_logs_dto.py.j2"
+    source: "dto_builders/audit_logs_builder.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_dto_builders/auth_dto_builder.py"
     type: file
@@ -455,11 +452,11 @@ structure:
 
   - path: "{{ project_name }}/{{ package_name }}_notifications/tests.py"
     type: file
-    source: "apps/tests.py.j2"
+    source: "notifications/tests.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_notifications/views.py"
     type: file
-    source: "apps/views.py.j2"
+    source: "notifications/views.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_notifications/migrations"
     type: dir
@@ -525,7 +522,7 @@ structure:
 
   - path: "{{ project_name }}/{{ package_name }}_settings/management/commands/seed_locations.py"
     type: file
-    source: "apps/commands/seed_locations.py.j2"
+    source: "settings/management/commands/seed_locations.py.j2"
 
   # ============================================================
   # 11. HTMLS - HTML templates for emails and notifications
@@ -537,13 +534,13 @@ structure:
     type: file
     source: "__init__.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_htmls/account_activation.html"
+  - path: "{{ project_name }}/{{ package_name }}_htmls//accounts/account_activation.html"
     type: file
-    source: "htmls/account_activation.html.j2"
+    source: "htmls/accounts/account_activation.html.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_htmls/password-reset.html"
-    type: file
-    source: "htmls/password-reset.html.j2"
+#  - path: "{{ project_name }}/{{ package_name }}_htmls/password_reset.html"
+#    type: file
+#    source: "htmls/accounts/password_reset.html.j2"
 
   # ============================================================
   # 12. UTILS - Shared utility modules
@@ -563,9 +560,9 @@ structure:
     type: file
     source: "__init__.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_utils/cache/decorators.py"
+  - path: "{{ project_name }}/{{ package_name }}_utils/cache/decorator.py"
     type: file
-    source: "utils/cache/decorators.py.j2"
+    source: "utils/cache/decorator.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_utils/cache/manager.py"
     type: file
@@ -587,33 +584,33 @@ structure:
     type: file
     source: "utils/decorators/log_exceptions.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_utils/decorators/permissions.py"
+  - path: "{{ project_name }}/{{ package_name }}_utils/decorators/permission.py"
     type: file
-    source: "utils/decorators/permissions.py.j2"
+    source: "utils/decorators/permission.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_utils/decorators/scope.py"
     type: file
     source: "utils/decorators/scope.py.j2"
 
   # Rate limit utilities
-  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit"
+  - path: "{{ project_name }}/{{ package_name }}_utils/ratelimit"
     type: dir
 
-  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit/__init__.py"
+  - path: "{{ project_name }}/{{ package_name }}_utils/ratelimit/__init__.py"
     type: file
     source: "__init__.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit/decorators.py"
+  - path: "{{ project_name }}/{{ package_name }}_utils/ratelimit/decorator.py"
     type: file
-    source: "utils/rate_limit/decorators.py.j2"
+    source: "utils/ratelimit/decorator.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit/middleware.py"
+  - path: "{{ project_name }}/{{ package_name }}_utils/ratelimit/middleware.py"
     type: file
-    source: "utils/rate_limit/middleware.py.j2"
+    source: "utils/ratelimit/middleware.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit/token_bucket.py"
+  - path: "{{ project_name }}/{{ package_name }}_utils/ratelimit/token_bucket.py"
     type: file
-    source: "utils/rate_limit/token_bucket.py.j2"
+    source: "utils/ratelimit/token_bucket.py.j2"
 
   # Validator utilities
   - path: "{{ project_name }}/{{ package_name }}_utils/validators"
@@ -640,9 +637,9 @@ structure:
     type: file
     source: "utils/cache_utils.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_utils/data_seeding.py"
+  - path: "{{ project_name }}/{{ package_name }}_utils/data_seeding_utils.py"
     type: file
-    source: "utils/data_seeding.py.j2"
+    source: "utils/data_seeding_utils.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_utils/features.py"
     type: file
@@ -664,9 +661,9 @@ structure:
     type: file
     source: "utils/log_exceptions.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_utils/notification_utils.py"
+  - path: "{{ project_name }}/{{ package_name }}_utils/notifications_utils.py"
     type: file
-    source: "utils/notification_utils.py.j2"
+    source: "utils/notifications_utils.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_utils/pdf_creator.py"
     type: file
@@ -682,12 +679,12 @@ structure:
 
 
   # ============================================================
-  # 9. FILES APP - Application files
+  # 13. FILES APP - Application files
   # ============================================================
   - path: "{{ project_name }}/{{ package_name }}_files"
     type: dir
 
-  - path: "{{ project_name }}/{{ package_name }}__files/__init__.py"
+  - path: "{{ project_name }}/{{ package_name }}_files/__init__.py"
     type: file
     source: "__init__.py.j2"
 
@@ -702,10 +699,6 @@ structure:
   - path: "{{ project_name }}/{{ package_name }}_files/models.py"
     type: file
     source: "files/models.py.j2"
-
-  - path: "{{ project_name }}/{{ package_name }}_files/constants.py"
-    type: file
-    source: "files/constants.py.j2"
 
   - path: "{{ project_name }}/{{ package_name }}_files/schema.py"
     type: file
@@ -726,9 +719,50 @@ structure:
     type: file
     source: "__init__.py.j2"
 
+  # ============================================================
+  # 14. ACCOUNTS APP - User Profiles
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_accounts"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_accounts/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_files/apps.py"
+    type: file
+    source: "accounts/apps.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_accounts/admin.py"
+    type: file
+    source: "accounts/admin.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_accounts/models.py"
+    type: file
+    source: "accounts/models.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_accounts/schema.py"
+    type: file
+    source: "accounts/schema.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_accounts/tests.py"
+    type: file
+    source: "accounts/tests.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_accounts/views.py"
+    type: file
+    source: "accounts/views.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_accounts/migrations"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_accounts/migrations/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
 
   # ============================================================
-  # 14: APPLICATION LOGS
+  # 15: APPLICATION LOGS
   # ============================================================
   - path: "{{ project_name }}/logs"
     type: dir

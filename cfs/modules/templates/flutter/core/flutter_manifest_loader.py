@@ -8,7 +8,8 @@ import re
 from pathlib import Path
 from typing import Dict, Any, List
 
-from cfs.modules.templates.flutter.core.exceptions.flutter_manifest_validation_error import FlutterManifestValidationError
+from cfs.modules.templates.flutter.core.exceptions.flutter_exceptions import FlutterManifestValidationError
+
 
 def _validate_computed_variables(computed: Dict[str, Any]) -> None:
     """Validate Flutter computed variables."""

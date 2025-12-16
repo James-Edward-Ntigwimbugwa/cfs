@@ -6,3 +6,5 @@ __pycache__/
 **/__pycache__/
 flutter_app/
 build/
+demo_project/
+django_backend/
