@@ -729,7 +729,7 @@ structure:
     type: file
     source: "__init__.py.j2"
 
-  - path: "{{ project_name }}/{{ package_name }}_files/apps.py"
+  - path: "{{ project_name }}/{{ package_name }}_accounts/apps.py"
     type: file
     source: "accounts/apps.py.j2"
 

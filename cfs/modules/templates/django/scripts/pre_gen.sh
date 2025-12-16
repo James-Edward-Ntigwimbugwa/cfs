@@ -114,7 +114,6 @@ UTIL_DIRS=(
     "${PACKAGE_NAME}_mixins"
     "${PACKAGE_NAME}_htmls"
     "${PACKAGE_NAME}_utils"
-    "${PACKAGE_NAME}_logs"
 
 )
 
