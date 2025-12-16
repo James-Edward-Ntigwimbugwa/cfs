@@ -1,0 +1,40 @@
+# core/constants.py
+
+NOTIFICATION_MAP = {
+    "ACCOUNT_ACTIVATION": {
+        "category": "User Management",
+        "subject": "{{ package_name | replace('_', ' ') | upper }} SUBSIDY PLATFORM ACCOUNT ACTIVATION",
+        "message_body": (
+            "Your account has been successfully created. "
+            "Please activate it using the button below to get started."
+        ),
+        "action_label": "Activate Account"
+    },
+    "USER_PASSWORD_RESET_REQUEST": {
+        "category": "User Management",
+        "subject": "Password Reset Request",
+        "message_body": (
+            "We received a request to reset your password. "
+            "Please click the link below to continue. This link will expire after {ExpireTimeInMinutes} minutes."
+        ),
+        "action_label": "Reset Password"
+    },
+    "USER_PASSWORD_CHANGED": {
+        "category": "User Management",
+        "subject": "Password Changed Successfully",
+        "message_body": (
+            "Your password was successfully changed on {DateTime}. "
+            "If this wasn't you, please contact {{ package_name | replace('_', ' ') | upper }} support."
+        ),
+        "action_label": "Contact Support"
+    },
+    "USER_ACCOUNT_DEACTIVATED": {
+        "category": "User Management",
+        "subject": "Account Deactivated",
+        "message_body": (
+            "Your account was deactivated on {DateTime}. "
+            "If this wasn't you, please contact {{ package_name | replace('_', ' ') | upper }} support."
+        ),
+        "action_label": "Contact Support"
+    }
+}

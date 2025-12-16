@@ -1,0 +1,27 @@
+import graphene
+
+from {{package_name}}_dto.shared_dto import ResponseObject
+
+
+class LocationsObject(graphene.ObjectType):
+    id = graphene.String()
+    unique_id = graphene.String()
+    name = graphene.String()
+    code = graphene.String()
+
+
+class FullLocationObject(graphene.ObjectType):
+    street_unique_id = graphene.String()
+    street = graphene.String()
+    ward = graphene.String()
+    district = graphene.String()
+    region = graphene.String()
+
+class LocationResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    data = graphene.List(LocationsObject)
+
+
+class FullLocationResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    data = graphene.List(FullLocationObject)

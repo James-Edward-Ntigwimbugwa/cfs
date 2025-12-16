@@ -1,0 +1,6 @@
+from django.apps import AppConfig
+
+
+class {{ package_name|title|replace('_', '') }}FilesConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = '{{package_name}}_files'

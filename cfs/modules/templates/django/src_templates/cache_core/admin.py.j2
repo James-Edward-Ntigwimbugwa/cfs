@@ -1,0 +1,220 @@
+# admin.py
+from functools import lru_cache
+from django.apps import apps
+from django.contrib import admin
+from django.db import models
+from django.core.exceptions import ImproperlyConfigured
+
+# ---- Tuning knobs ----------------------------------------------------------
+EXCLUDE_APP_PREFIXES = (
+    "django.", "rest_framework", "drf_", "graphene", "allauth",
+    "corsheaders", "debug_toolbar", "oauth2_provider", "social_django",
+)
+MAX_LIST_DISPLAY = 12     # cap for list_display to keep admin snappy
+DEFAULT_LIST_PER_PAGE = 50
+
+# If your BaseModel defines these, they’ll be made read-only/date hierarchy
+CANDIDATE_DATE_HIERARCHY_FIELDS = ("created_at", "updated_at", "created", "date", "meeting_date")
+
+# ---------------------------------------------------------------------------
+
+def _is_local_app(app_config):
+    return not app_config.name.startswith(EXCLUDE_APP_PREFIXES)
+
+@lru_cache(maxsize=512)
+def _split_fields(model):
+    """
+    Introspect model fields once and cache the result.
+    Returns a dict of categorized field names.
+    """
+    concrete = list(model._meta.get_fields())
+    fk_fields, m2m_fields, many_to_one = [], [], []
+    char_like, text_like, email_like, slug_like = [], [], [], []
+    bool_fields, choice_fields, date_fields, datetime_fields, int_like, json_like = [], [], [], [], [], []
+    file_image_fields, ip_fields = [], []
+
+    for f in concrete:
+        # Skip reverse relations / auto-created
+        if getattr(f, "auto_created", False) and not getattr(f, "concrete", False):
+            continue
+
+        # M2M
+        if f.many_to_many:
+            m2m_fields.append(f.name)
+            continue
+
+        # FKs / OneToOne
+        if isinstance(f, (models.ForeignKey, models.OneToOneField)):
+            fk_fields.append(f.name)
+            continue
+
+        # Data fields
+        if isinstance(f, (models.CharField,)):
+            char_like.append(f.name)
+            if f.choices:
+                choice_fields.append(f.name)
+        elif isinstance(f, models.TextField):
+            text_like.append(f.name)
+        elif isinstance(f, models.EmailField):
+            email_like.append(f.name)
+        elif isinstance(f, models.SlugField):
+            slug_like.append(f.name)
+        elif isinstance(f, models.BooleanField):
+            bool_fields.append(f.name)
+        elif isinstance(f, (models.DateField,)):
+            date_fields.append(f.name)
+        elif isinstance(f, (models.DateTimeField,)):
+            datetime_fields.append(f.name)
+        elif isinstance(f, (models.IntegerField, models.BigIntegerField, models.PositiveIntegerField, models.PositiveSmallIntegerField, models.SmallIntegerField)):
+            int_like.append(f.name)
+        elif isinstance(f, (models.JSONField,)):
+            json_like.append(f.name)
+        elif isinstance(f, (models.FileField, models.ImageField)):
+            file_image_fields.append(f.name)
+        elif isinstance(f, (models.GenericIPAddressField, models.IPAddressField)):
+            ip_fields.append(f.name)
+        else:
+            # Try to catch choices on other field types too
+            if getattr(f, "choices", None):
+                choice_fields.append(f.name)
+
+    # Id/PK
+    pk_name = model._meta.pk.name if model._meta.pk else "id"
+
+    return {
+        "pk": pk_name,
+        "fk": tuple(fk_fields),
+        "m2m": tuple(m2m_fields),
+        "char": tuple(char_like),
+        "text": tuple(text_like),
+        "email": tuple(email_like),
+        "slug": tuple(slug_like),
+        "bool": tuple(bool_fields),
+        "choice": tuple(choice_fields),
+        "date": tuple(date_fields),
+        "datetime": tuple(datetime_fields),
+        "int": tuple(int_like),
+        "json": tuple(json_like),
+        "fileimg": tuple(file_image_fields),
+        "ip": tuple(ip_fields),
+        "all_fields": tuple([f.name for f in model._meta.fields]),
+    }
+
+def _build_list_display(model):
+    f = _split_fields(model)
+    # Prefer readable, lightweight fields
+    preferred = (
+        [f["pk"]] +
+        list(f["char"]) + list(f["email"]) + list(f["slug"]) +
+        list(f["bool"]) + list(f["choice"]) + list(f["int"]) +
+        list(f["date"]) + list(f["datetime"]) +
+        list(f["fk"])  # show FK columns, will use select_related
+    )
+    # Drop heavy columns
+    drop = set(f["text"]) | set(f["json"]) | set(f["fileimg"])
+    dedup = []
+    for name in preferred:
+        if name not in dedup and name not in drop:
+            dedup.append(name)
+        if len(dedup) >= MAX_LIST_DISPLAY:
+            break
+    return tuple(dedup) if dedup else (f["pk"],)
+
+def _build_list_filter(model):
+    f = _split_fields(model)
+    # Good defaults: booleans, choices, FKs, dates/datetimes
+    base = list(f["bool"]) + list(f["choice"]) + list(f["fk"]) + list(f["date"]) + list(f["datetime"])
+    # Keep it reasonable
+    return tuple(base[:10])
+
+def _build_search_fields(model):
+    f = _split_fields(model)
+    # Text-ish fields are safe for icontains
+    base = list(f["char"]) + list(f["email"]) + list(f["slug"])
+    # Also add PK/id exact search
+    if f["pk"] and f["pk"] not in base:
+        base.append(f"{f['pk']}__exact")
+    # Avoid searching FK raw IDs by default; admin handles that via filters/autocomplete
+    return tuple(base[:10])  # cap for perf
+
+def _pick_date_hierarchy(model):
+    f = _split_fields(model)
+    for candidate in CANDIDATE_DATE_HIERARCHY_FIELDS:
+        if candidate in f["date"] or candidate in f["datetime"]:
+            return candidate
+    # or first datetime field
+    return f["datetime"][0] if f["datetime"] else (f["date"][0] if f["date"] else None)
+
+def _readonly_auto_fields(model):
+    readonly = []
+    for field in model._meta.get_fields():
+        if isinstance(field, (models.DateTimeField, models.DateField)):
+            if getattr(field, "auto_now", False) or getattr(field, "auto_now_add", False):
+                readonly.append(field.name)
+    return tuple(readonly)
+
+def _admin_for(model):
+    field_meta = _split_fields(model)
+
+    class AutoAdmin(admin.ModelAdmin):
+        list_display = _build_list_display(model)
+        list_filter = _build_list_filter(model)
+        search_fields = _build_search_fields(model)
+        list_per_page = DEFAULT_LIST_PER_PAGE
+        date_hierarchy = _pick_date_hierarchy(model)
+        readonly_fields = _readonly_auto_fields(model)
+
+        # Speed: cut N+1s
+        list_select_related = field_meta["fk"]
+
+        # Autocomplete for relations (Django admin requires related admin to have search_fields)
+        autocomplete_fields = field_meta["fk"] + field_meta["m2m"]
+
+        # Use raw_id_fields for very heavy M2M as a fallback;
+        # comment this in if you find autocomplete too heavy:
+        # raw_id_fields = field_meta["m2m"]
+
+        def get_queryset(self, request):
+            qs = super().get_queryset(request)
+            if field_meta["fk"]:
+                qs = qs.select_related(*field_meta["fk"])
+            if field_meta["m2m"]:
+                qs = qs.prefetch_related(*field_meta["m2m"])
+            # Defer very heavy columns on changelist
+            heavy = set(field_meta["text"]) | set(field_meta["json"]) | set(field_meta["fileimg"])
+            if heavy:
+                present = [f.name for f in model._meta.fields]
+                to_defer = [h for h in heavy if h in present and h not in self.list_display]
+                if to_defer:
+                    qs = qs.defer(*to_defer)
+            return qs
+
+    AutoAdmin.__name__ = f"{model.__name__}AutoAdmin"
+    return AutoAdmin
+
+def register_all_models(admin_site=admin.site, include_apps=None):
+    """
+    Registers all models for local apps (or the provided include_apps list)
+    with a performant, cached ModelAdmin.
+    """
+    app_configs = apps.get_app_configs()
+    for app_config in app_configs:
+        if include_apps:
+            if app_config.label not in include_apps and app_config.name not in include_apps:
+                continue
+        else:
+            if not _is_local_app(app_config):
+                continue
+
+        for model in app_config.get_models():
+            try:
+                admin_site.register(model, _admin_for(model))
+            except admin.sites.AlreadyRegistered:
+                # Already handled elsewhere; skip safely
+                continue
+            except ImproperlyConfigured:
+                # Some exotic proxy/managed=False models might complain; skip them
+                continue
+
+# Call once after Django loads apps (admin auto-discover runs this file).
+register_all_models()

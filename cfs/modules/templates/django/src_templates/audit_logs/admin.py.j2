@@ -1,0 +1,216 @@
+from django.contrib import admin
+from django.contrib.admin.views.main import ChangeList
+from django.utils.html import format_html
+from .models import AuditLog
+
+class ExecutionTimeFilter(admin.SimpleListFilter):
+    title = 'Execution Time'
+    parameter_name = 'execution_time'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('ultra_faster', 'Ultra Faster (< 100ms) ⚡'),
+            ('faster', 'Faster (100ms - 500ms) 🏃'),
+            ('fast', 'Fast (500ms - 1s) 🚶'),
+            ('slow', 'Slow (1s - 2s) ➡️'),
+            ('very_slow', 'Very Slow (> 2s) 🐌'),
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+
+        if value == 'ultra_faster':
+            return queryset.filter(execution_time_ms__lt=100)
+        elif value == 'faster':
+            return queryset.filter(execution_time_ms__range=(100, 499))
+        elif value == 'fast':
+            return queryset.filter(execution_time_ms__range=(500, 999))
+        elif value == 'slow':
+            return queryset.filter(execution_time_ms__range=(1000, 1999))
+        elif value == 'very_slow':
+            return queryset.filter(execution_time_ms__gte=2000)
+        return queryset
+
+class ItemsPerPageFilter(admin.SimpleListFilter):
+    title = 'Items Per Page'
+    parameter_name = 'items_per_page'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('10', '10 items'),
+            ('20', '20 items'),
+            ('50', '50 items'),
+            ('100', '100 items'),
+        ]
+
+    def queryset(self, request, queryset):
+        return queryset
+    
+class AuditLogChangeList(ChangeList):
+  
+    def get_queryset(self, request):
+        items_per_page = self.params.get('items_per_page')
+        if items_per_page and items_per_page.isdigit():
+            self.list_per_page = int(items_per_page)
+        qs = super().get_queryset(request)
+        return qs.select_related('user')
+    
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['page_size_options'] = [10, 20, 50, 100]
+        context['current_page_size'] = self.paginator.per_page
+        return context
+    
+    def changelist_view(self, request, extra_context=None):
+        try:
+            per_page = int(request.GET.get('per_page', 20))
+            if per_page not in [10, 20, 50, 100]:
+                per_page = 20
+        except (ValueError, TypeError):
+            per_page = 20
+
+        self.list_per_page = per_page
+
+        return super().changelist_view(request, extra_context=extra_context)
+
+@admin.register(AuditLog)
+class AuditLogAdmin(admin.ModelAdmin):
+    list_per_page = 20
+    
+    def has_add_permission(self, request):
+        return False  # Disable add permission
+    
+    def has_change_permission(self, request, obj=None):
+        return False  # Disable edit permission
+    
+    def has_delete_permission(self, request, obj=None):
+        return False  # Disable delete permission
+
+    def colored_status_code(self, obj):
+        if obj.status_code == 200:
+            color = '#28a745'
+        elif obj.status_code in {400, 401, 403, 404, 500}:
+            color = '#dc3545'
+        else:
+            color = '#000000'
+            
+        return format_html('<span style="color: {}; data-value="{}">{}</span>', color, obj.status_code, obj.status_code)
+    colored_status_code.short_description = 'Status Code'
+    colored_status_code.admin_order_field = 'status_code'
+
+    def formatted_query(self, obj):
+        if not obj.query:
+            return "-"
+        return format_html(
+            '<div class="copy-wrapper">'
+            '<pre class="copyable-content">{}</pre>'
+            '<button class="copy-button" title="Copy to clipboard">📋</button>'
+            '</div>',
+            obj.query
+        )
+    formatted_query.short_description = 'Query'
+
+    def formatted_variables(self, obj):
+        if not obj.variables:
+            return "-"
+        return format_html(
+            '<div class="copy-wrapper">'
+            '<pre class="copyable-content">{}</pre>'
+            '<button class="copy-button" title="Copy to clipboard">📋</button>'
+            '</div>',
+            obj.variables
+        )
+    formatted_variables.short_description = 'Variables'
+
+    list_display = (
+        'timestamp',
+        'operation_type',
+        'operation_name',
+        'user',
+        'status_code',
+        'message',
+        'execution_time_ms',
+        'ip_address',
+    )
+    
+    list_filter = (
+        'operation_type',
+        'status_code',
+        'is_staff',
+        'timestamp',
+        ExecutionTimeFilter,
+        # ItemsPerPageFilter,
+    )
+    
+    search_fields = (
+        'operation_name',
+        'query',
+        'ip_address'
+    )
+
+    readonly_fields = (
+        'timestamp',
+        'execution_time_ms',
+        'path',
+        'method',
+        'status_code',
+        'message',
+        'user',
+        'is_staff',
+        'ip_address',
+        'user_agent',
+        'referrer',
+        'operation_name',
+        'operation_type',
+        'formatted_query',
+        'formatted_variables',
+        'errors'
+    )
+
+    fieldsets = (
+        ('Timing', {
+            'fields': (
+                'timestamp',
+                'execution_time_ms',
+            )
+        }),
+        ('Request Information', {
+            'fields': (
+                'path',
+                'method',
+                'status_code',
+            )
+        }),
+        ('User Information', {
+            'fields': (
+                'user',
+                'is_staff',
+            )
+        }),
+        ('Client Information', {
+            'fields': (
+                'ip_address',
+                'user_agent',
+                'referrer',
+            )
+        }),
+        ('Operation Details', {
+            'fields': (
+                'operation_name',
+                'operation_type',
+                'formatted_query',
+                'message',
+                'formatted_variables',
+            ),
+        }),
+        ('Error Information', {
+            'fields': ('errors',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    class Media:
+        css = {
+            'all': ('{{ package_name }}_audit_logs/css/audit_log.css',)
+        }
+        js = ('{{ package_name }}_audit_logs/js/audit_log.js',)

@@ -1,0 +1,34 @@
+from {{package_name}}_audit_logs.models import AuditLog
+from {{package_name}}_dto.audit_logs_dto import AuditLogObject
+from {{package_name}}_utils.cache_utils import get_cached_model_or_db
+
+
+class AuditLogBuilder:
+    @staticmethod
+    def get_audit_log_data(id: int):
+        query_set: AuditLog = get_cached_model_or_db(AuditLog, id)
+        if not query_set:
+            return None
+        
+        return AuditLogObject(
+            id=query_set.primary_key,
+            unique_id=query_set.unique_id,
+            timestamp=query_set.timestamp,
+            execution_time_ms=query_set.execution_time_ms,
+            path=query_set.path,
+            method=query_set.method,
+            status_code=query_set.status_code,
+            message=query_set.message,
+            user_id=query_set.user.pk,
+            is_staff=query_set.is_staff,
+            ip_address=query_set.ip_address,
+            user_agent=query_set.user_agent,
+            referrer=query_set.referrer,
+            operation_name=query_set.operation_name,
+            operation_type=query_set.operation_type,
+            query=query_set.query,
+            variables=query_set.variables,
+            errors=query_set.errors,
+        )
+
+

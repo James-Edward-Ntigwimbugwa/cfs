@@ -1,0 +1,29 @@
+import graphene
+
+from {{package_name}}_dto.enums import InAppNotificationTypeEnum
+from {{package_name}}_dto.shared_dto import PageObject, ResponseObject
+from {{package_name}}_mixins.base_object import BaseFilteringObject, BaseObject
+
+
+
+
+class NotificationFilteringObject(BaseFilteringObject): ...
+
+
+class NotificationObject(BaseObject):
+    title = graphene.String()
+    message = graphene.String()
+    viewed = graphene.Boolean()
+    notification_type = InAppNotificationTypeEnum()
+    callback_item_id = graphene.String()
+
+
+class NotificationResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    page = graphene.Field(PageObject)
+    data = graphene.List(NotificationObject)
+
+
+class UnreadNotificationInputObject(graphene.InputObjectType):
+    unread_all = graphene.Boolean()
+    unique_ids = graphene.List(graphene.String)

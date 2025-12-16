@@ -1,0 +1,7 @@
+from django.apps import AppConfig
+
+
+class {{ package_name|title|replace('_', '') }}AuditLogsConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = '{{ package_name }}_audit_logs'
+    verbose_name = "{{ package_name|upper|replace('_', ' ') }} AUDIT LOGS"

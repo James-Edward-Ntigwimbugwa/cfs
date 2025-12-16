@@ -1,0 +1,195 @@
+import json
+import time
+from typing import Any, Dict, Optional
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpRequest, HttpResponse
+from django.utils.timezone import now
+from oauth2_provider.models import AccessToken, Application
+
+from .models import AuditLog
+
+
+class GraphQLAuditMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    @staticmethod
+    def _get_user_info(request: HttpRequest) -> Dict[str, Any]:
+        """
+        Extract user info from a Bearer token using DOT's AccessToken model.
+        Mirrors old logic but avoids guessing a client/application via .last().
+        """
+        user = None
+        auth_header = request.headers.get("Authorization") or ""
+        parts = auth_header.split()
+
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            access_token = parts[1]
+            try:
+                token = (
+                    AccessToken.objects.select_related("user").filter(token=access_token, expires__gt=now()).first()
+                )
+                if token:
+                    user = token.user
+                    # If you *must* assert a specific client/app, you can use:
+                    # app_client_id = token.application.client_id
+            except (IndexError, ObjectDoesNotExist):
+                pass
+
+        return {
+            "user": user,
+            "user_id": getattr(user, "id", None),
+            "is_staff": getattr(user, "is_staff", False),
+        }
+
+    def _get_client_info(self, request: HttpRequest) -> Dict[str, str]:
+        """Extract client information from the request."""
+        return {
+            "ip_address": self._get_client_ip(request),
+            "user_agent": request.META.get("HTTP_USER_AGENT", "Unknown"),
+            "referrer": request.META.get("HTTP_REFERER", "Unknown"),
+        }
+
+    @staticmethod
+    def _get_client_ip(request: HttpRequest) -> str:
+        """Get the client's IP address."""
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            return x_forwarded_for.split(",")[0].strip()
+        return request.META.get("REMOTE_ADDR", "Unknown")
+
+    @staticmethod
+    def _is_introspection_query(query: str) -> bool:
+        """Check if the query is an introspection query."""
+        if not query:
+            return False
+
+        introspection_patterns = [
+            "__schema",
+            "__type",
+            "IntrospectionQuery",
+            "query IntrospectionQuery",
+        ]
+
+        query = query.strip()
+        return any(pattern in query for pattern in introspection_patterns)
+
+    def _extract_operation_info(self, request_data: Dict) -> Dict[str, Optional[str]]:
+        return {
+            "operation_name": request_data.get("operationName"),
+            "operation_type": self._get_operation_type(request_data.get("query", "")),
+            "query": request_data.get("query"),
+            "variables": request_data.get("variables"),
+        }
+
+    @staticmethod
+    def _get_operation_type(query: str) -> str:
+        query = (query or "").strip().lower()
+        if query.startswith("query"):
+            return "query"
+        elif query.startswith("mutation"):
+            return "mutation"
+        elif query.startswith("subscription"):
+            return "subscription"
+        return "unknown"
+
+    @staticmethod
+    def _extract_graphql_status(response):
+        """
+        Expecting a GraphQL response with shape:
+        {
+          "data": {
+            "<operation>": {
+              "response": {"status": "...","code": "...","message": "..."}
+            }
+          }
+        }
+        """
+        try:
+            if not isinstance(response, dict):
+                return ("-1", "10000", "Invalid response data returned")
+
+            if "data" not in response or not isinstance(response["data"], dict):
+                return ("-1", "10000", "Invalid response structure returned")
+
+            operation = next(iter(response["data"]))
+            response_obj = response["data"][operation]["response"]
+            return (response_obj["status"], response_obj["code"], response_obj["message"])
+
+        except (KeyError, TypeError) as _e:
+            return ("-1", "10000", f"Invalid response structure returned. ERROR: {_e}")
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        if not request.path.endswith("graphql"):
+            return self.get_response(request)
+
+        start_time = time.time()
+        response = self.get_response(request)
+        execution_time = time.time() - start_time
+
+        try:
+            # Parse incoming GraphQL payload (single op)
+            try:
+                request_body = request.body.decode("utf-8") if request.body else ""
+                request_data = json.loads(request_body) if request_body else {}
+            except Exception:
+                request_data = {}
+
+            # Skip logging if it's an introspection query
+            if self._is_introspection_query(request_data.get("query", "")):
+                return response
+
+            # Get user and operation info
+            user_info = self._get_user_info(request)
+            client_info = self._get_client_info(request)
+            operation_info = self._extract_operation_info(request_data)
+
+            # Parse GraphQL response body
+            try:
+                resp_text = (
+                    response.content.decode(getattr(response, "charset", "utf-8"))
+                    if hasattr(response, "content") else ""
+                )
+                response_data = json.loads(resp_text) if resp_text else {}
+            except Exception:
+                response_data = {}
+
+            _, code, message = self._extract_graphql_status(response_data)
+
+            # Create and save the audit log entry
+            audit_log_id = getattr(request, "_partial_audit_log_id", None)
+            payload = {
+                "execution_time_ms": round(execution_time * 1000, 2),
+                "path": request.path,
+                "method": request.method,
+                "status_code": code,
+                "message": message,
+                "user": user_info["user"],
+                "is_staff": user_info["is_staff"],
+                "ip_address": client_info["ip_address"],
+                "user_agent": client_info["user_agent"],
+                "referrer": client_info["referrer"],
+                "operation_name": operation_info["operation_name"],
+                "operation_type": operation_info["operation_type"],
+                "query": operation_info["query"] or "",
+                "variables": operation_info["variables"],
+            }
+
+            if audit_log_id:
+                AuditLog.objects.update_or_create(unique_id=audit_log_id, defaults=payload)
+            else:
+                AuditLog.objects.create(**payload)
+
+        except Exception as e:
+            # Create error log entry
+            AuditLog.objects.create(
+                execution_time_ms=round(execution_time * 1000, 2),
+                path=request.path,
+                method=request.method,
+                status_code=500,
+                operation_type="error",
+                query="",
+                errors={"message": f"Audit logging failed: {str(e)}"},
+            )
+
+        return response

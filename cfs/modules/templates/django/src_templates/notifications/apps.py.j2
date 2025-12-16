@@ -1,0 +1,10 @@
+from django.apps import AppConfig
+
+
+class {{ package_name|title|replace('_', '') }}NotificationsConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = '{{package_name}}_notifications'
+    verbose_name = "{{ package_name|upper|replace('_', ' ') }} NOTIFICATION CONFIGS"
+
+    def ready(self):
+        import {{package_name}}_notifications.signals

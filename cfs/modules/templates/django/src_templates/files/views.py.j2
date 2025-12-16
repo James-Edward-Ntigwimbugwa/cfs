@@ -1,0 +1,74 @@
+from django.shortcuts import render
+import base64
+import logging
+import mimetypes
+import traceback
+
+import graphene
+import magic
+
+from {{package_name}}_utils.decorators.permission import login_required
+from {{package_name}}_dto.enums import FileVisibiltyChoices
+from {{package_name}}_dto.files_dto import Base64FileInputObjects, FileObjects
+from {{package_name}}_dto.shared_dto import ResponseObject
+from {{package_name}}_files.models import FileKeys
+from {{package_name}}_utils.file_utils import UploadFile
+
+logger = logging.getLogger(__name__)
+
+
+class UploadBase64FileMutation(graphene.Mutation):
+    class Arguments:
+        input = Base64FileInputObjects(required=True)
+
+    response = graphene.Field(ResponseObject)
+    data = graphene.Field(FileObjects)
+
+    @classmethod
+    @login_required()
+    def mutate(cls, root, info, input):
+        try:
+            if input.base64_string is None:
+                return cls(ResponseObject.get_response(id=6), None)
+
+            file_visibility = input.file_visibility.value if input.file_visibility else FileVisibiltyChoices.PRIVATE.value
+            allowed_images_for_upload = ['jpeg', 'jpg', 'png', 'svg']
+            allowed_documents_for_upload = ['docs', 'xls', 'pdf', 'txt', 'doc', 'docx', 'csv', 'xlsx']
+            allowed_videos_for_upload = ['mp4', 'webm', 'gif']
+            allowed_audios_for_upload = ['mp3']
+
+            decoded_data = base64.b64decode(input.base64_string)
+            file_type = magic.from_buffer(decoded_data, mime=True)
+            file_extension = mimetypes.guess_extension(file_type)
+
+            if file_extension is None:
+                return cls(response=ResponseObject.get_response(id=11), data=None)
+
+            parent_folder = 'documents'
+            if file_extension.replace('.', '') in allowed_images_for_upload:
+                parent_folder = 'images'
+            elif file_extension.replace('.', '') in allowed_documents_for_upload:
+                parent_folder = 'documents'
+            elif file_extension.replace('.', '') in allowed_videos_for_upload:
+                parent_folder = 'videos'
+            elif file_extension.replace('.', '') in allowed_audios_for_upload:
+                parent_folder = 'audios'
+            else:
+                return cls(response=ResponseObject.get_response(id=11), data=None)
+
+            success, key, file_id, attachment_path = UploadFile.base64_handler(input.base64_string, file_extension, parent_folder, file_visibility)
+
+            # Store file information to database
+            if success:
+                if file_visibility == FileVisibiltyChoices.PRIVATE.value:
+                    FileKeys.objects.create(key_name=key, key_file_id=file_id)
+            return cls(response=ResponseObject.get_response(id=1), data=FileObjects(attachment_path, input.file_name))
+
+        except Exception as e:
+            logger.error(f'[AttachmentFiles] Upload Base64 File Mutation :: {e}')
+            traceback.print_exc()
+            return cls(response=ResponseObject.get_response(id=5), data=None)
+
+
+class Mutation(graphene.ObjectType):
+    upload_base_64_file = UploadBase64FileMutation.Field(description="PERMISSIONS=['can_upload_files']")

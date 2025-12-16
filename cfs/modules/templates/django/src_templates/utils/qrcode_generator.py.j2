@@ -1,0 +1,15 @@
+import segno
+from io import BytesIO
+from django.core.files.base import ContentFile
+
+def generate_qr_png(data_string):
+    # Create QR code
+    qr = segno.make(data_string)
+
+    # Create PNG in memory
+    png_buffer = BytesIO()
+    qr.save(png_buffer, kind="png", scale=5,border=1)
+    png_buffer.seek(0)
+
+    # Return as Django ContentFile
+    return ContentFile(png_buffer.read(), "qr.png")

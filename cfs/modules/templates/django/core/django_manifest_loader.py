@@ -1,0 +1,2 @@
+class DjangoManifestLoader:
+    pass

@@ -49,13 +49,13 @@ def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load React modules: {e}")
 
-        # case 'django':
-        #     try:
-        #         from modules.templates.django.core.django_generator import DjangoGenerator
-        #         from modules.templates.django.core.django_manifest_loader import DjangoManifestLoader
-        #         return DjangoGenerator, DjangoManifestLoader
-        #     except ImportError as e:
-        #         raise ImportError(f"Failed to load Django modules: {e}")
+        case 'django':
+            try:
+                from modules.templates.django.core.django_generator import DjangoGenerator
+                from modules.templates.django.core.django_manifest_loader import DjangoManifestLoader
+                return DjangoGenerator, DjangoManifestLoader
+            except ImportError as e:
+                raise ImportError(f"Failed to load Django modules: {e}")
 
         # case 'nextjs':
         #     try:
@@ -239,14 +239,14 @@ def init(template_name, project_name, package_name, language, api_protocol,
                 )
 
     # Display what will be created
-    click.echo(f"\n📦 Generating {template_name} project:")
+    click.echo(f"\nGenerating {template_name} project:")
     for key, value in variables.items():
         display_key = key.replace('_', ' ').title()
         click.echo(f"   {display_key}: {value}")
     click.echo(f"   Output directory: {output_dir}\n")
 
     if dry_run:
-        click.echo("🔍 DRY RUN - No files will be created\n")
+        click.echo(click.style("DRY RUN - No files will be created\n", fg='yellow'))
 
     # Generate the project
     try:
@@ -258,28 +258,28 @@ def init(template_name, project_name, package_name, language, api_protocol,
         )
 
         if dry_run:
-            click.echo("Would create:")
+            click.echo(click.style("Would create:", fg='yellow'))
             for item in result['would_create']:
                 click.echo(f"   ✓ {item}")
         else:
             if result['created']:
-                click.echo("✨ Created files:")
+                click.echo(click.style("Created files:", fg='green'))
                 for item in result['created']:
-                    click.echo(f"   ✓ {item}")
+                    click.echo(click.style(f"   ✓ {item}", fg='green'))
 
             if result.get('skipped'):
-                click.echo(f"\n⚠️  Skipped (already exist):")
+                click.echo(click.style("\nSkipped (already exist):", fg='yellow'))
                 for item in result['skipped']:
-                    click.echo(f"   - {item}")
+                    click.echo(click.style(f"   - {item}", fg='yellow'))
 
         project_dir = Path(output_dir) / variables.get('project_name', '')
-        click.echo(f"\n🎉 Done! Your {template_name} project is ready at: {project_dir}")
+        click.echo(click.style(f"\nDone! Your {template_name} project is ready at: {project_dir}", fg='green', bold=True))
 
         # Show next steps based on framework
         show_next_steps(template_name, variables)
 
     except Exception as e:
-        click.echo(f"\n❌ Error during generation: {e}", err=True)
+        click.echo(click.style(f"\nError during generation: {e}", fg='red', bold=True), err=True)
         if debug:
             raise
         sys.exit(1)
@@ -287,7 +287,7 @@ def init(template_name, project_name, package_name, language, api_protocol,
 
 def show_next_steps(template_name: str, variables: dict) -> None:
     """Show framework-specific next steps after generation."""
-    click.echo("\n📋 Next steps:")
+    click.echo(click.style("\nNext steps:", fg='cyan', bold=True))
 
     match template_name:
         case 'springboot':

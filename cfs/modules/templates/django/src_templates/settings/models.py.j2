@@ -1,0 +1,63 @@
+from django.db import models
+from {{package_name}}_mixins.models import BaseModel
+
+
+class Regions(BaseModel):
+    region_name = models.CharField(max_length=191, unique=True, null=False)
+    region_napa_id = models.IntegerField()
+    region_code = models.CharField(max_length=191, unique=True, blank=True)
+
+    class Meta:
+        db_table = '{{package_name}}_regions'
+        ordering = ['region_name']
+        verbose_name_plural = 'REGIONS'
+
+    def __str__(self):
+        return "{}".format(self.region_name)
+
+
+class Districts(BaseModel):
+    district_name = models.CharField(max_length=191, null=False, blank=False)
+    district_napa_id = models.IntegerField()
+    district_code = models.CharField(max_length=191, blank=True)
+    district_region = models.ForeignKey(
+        Regions, null=False, blank=False, on_delete=models.CASCADE, related_name='district_region')
+
+    class Meta:
+        db_table = '{{package_name}}_districts'
+        ordering = ['district_name']
+        verbose_name_plural = 'DISTRICTS'
+
+    def __str__(self):
+        return "{} - {}".format(self.district_name, self.district_region.region_name)
+
+
+class Wards(BaseModel):
+    ward_name = models.CharField(max_length=191, null=False, blank=False)
+    ward_napa_id = models.IntegerField(blank=True)
+    ward_code = models.CharField(max_length=191, blank=True)
+    ward_district = models.ForeignKey(
+        Districts, null=False, blank=False, on_delete=models.CASCADE, related_name='ward_district')
+
+    class Meta:
+        db_table = '{{package_name}}_wards'
+        ordering = ['ward_name']
+        verbose_name_plural = 'WARDS'
+
+    def __str__(self):
+        return "{} - {}".format(self.ward_name, self.ward_district.district_name)
+
+
+class Streets(BaseModel):
+    street_name = models.CharField(max_length=191, null=False, blank=False)
+    street_napa_id = models.IntegerField(blank=True)
+    street_code = models.CharField(max_length=191, blank=True)
+    street_ward = models.ForeignKey(Wards, null=False, blank=False, on_delete=models.CASCADE, related_name='street_ward')
+
+    class Meta:
+        db_table = '{{package_name}}_streets'
+        ordering = ['street_name']
+        verbose_name_plural = 'STREETS'
+
+    def __str__(self):
+        return "{} - {}".format(self.street_name, self.street_ward.ward_name)

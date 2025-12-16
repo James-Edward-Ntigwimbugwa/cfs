@@ -1,0 +1,766 @@
+# Django Backend Template Manifest
+# This file defines the template structure, variables, and hooks for the cfs generator
+
+name: django
+description: Django backend application with GraphQL support, modular app structure, and production-ready configuration
+version: 1.0.0
+
+# Variables define the inputs users provide when scaffolding
+variables:
+  project_name:
+    type: string
+    prompt: "Project name (used for directory name)"
+    default: "django_backend"
+    validation: "^[a-z][a-z0-9_]*$"
+
+  package_name:
+    type: string
+    prompt: "Package name (used as prefix for Django apps, e.g., 'demo_project')"
+    default: "myapp"
+    validation: "^[a-z][a-z0-9_]*$"
+
+  database_engine:
+    type: choice
+    prompt: "Database engine"
+    choices: ["postgresql", "mysql", "sqlite"]
+    default: "postgresql"
+
+  use_graphql:
+    type: boolean
+    prompt: "Include GraphQL support (graphene-django)"
+    default: true
+
+  use_celery:
+    type: boolean
+    prompt: "Include Celery for async tasks"
+    default: true
+
+  python_version:
+    type: string
+    prompt: "Python version"
+    default: "3.11"
+    validation: "^3\\.(9|10|11|12)$"
+
+# Computed variables (derived from user inputs)
+computed:
+  package_prefix: "{{ package_name }}_"
+  django_project_name: "{{ package_name }}_backend"
+  secret_key_placeholder: "django-insecure-change-this-in-production"
+
+# Files source directory containing Jinja2 templates
+files_source: "src_templates"
+
+# Structure defines the directory and file layout of the generated project
+structure:
+  # Root project directory
+  - path: "{{ project_name }}"
+    type: dir
+
+  # Root level files
+  - path: "{{ project_name }}/manage.py"
+    type: file
+    source: "manage.py.j2"
+
+  - path: "{{ project_name }}/requirements.txt"
+    type: file
+    source: "requirements.txt.j2"
+
+  - path: "{{ project_name }}/requirements-dev.txt"
+    type: file
+    source: "requirements-dev.txt.j2"
+
+  - path: "{{ project_name }}/.env.example"
+    type: file
+    source: ".env.example.j2"
+
+  - path: "{{ project_name }}/.gitignore"
+    type: file
+    source: ".gitignore.j2"
+
+  - path: "{{ project_name }}/README.md"
+    type: file
+    source: "README.md.j2"
+
+  - path: "{{ project_name }}/Dockerfile"
+    type: file
+    source: "Dockerfile.j2"
+
+  - path: "{{ project_name }}/docker-compose.yml"
+    type: file
+    source: "docker-compose.yml.j2"
+
+  # ============================================================
+  # 1. ASSETS APP - Static and configuration assets
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_assets"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/locations"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/locations/Districts.csv"
+    type: file
+    source: "assets/locations/Districts.csv.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/locations/Regions.csv"
+    type: file
+    source: "assets/locations/Regions.csv.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/locations/Streets.csv"
+    type: file
+    source: "assets/locations/Streets.csv.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/locations/Wards.csv"
+    type: file
+    source: "assets/locations/Wards.csv.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/countries.json"
+    type: file
+    source: "assets/countries.json.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/permissions.json"
+    type: file
+    source: "assets/permissions.json.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_assets/responses.json"
+    type: file
+    source: "assets/responses.json.j2"
+
+  # ============================================================
+  # 2. AUDIT LOGS APP - Django GraphQL app
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/apps.py"
+    type: file
+    source: "audit_logs/apps.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/admin.py"
+    type: file
+    source: "audit_logs/admin.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/models.py"
+    type: file
+    source: "audit_logs/models.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/schema.py"
+    type: file
+    source: "audit_logs/schema.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/tests.py"
+    type: file
+    source: "audit_logs/tests.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/views.py"
+    type: file
+    source: "audit_logs/views.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/migrations"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_audit_logs/migrations/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  # ============================================================
+  # 3. AUTH APP - Authentication and user management
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_auth"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_auth/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_auth/apps.py"
+    type: file
+    source: "auth/apps.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_auth/admin.py"
+    type: file
+    source: "auth/admin.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_auth/models.py"
+    type: file
+    source: "auth/models.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_auth/tests.py"
+    type: file
+    source: "auth/tests.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_auth/views.py"
+    type: file
+    source: "auth/views.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_auth/migrations"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_auth/migrations/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  # ============================================================
+  # 4. BACKEND APP - Core Django project configuration
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_backend"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/settings"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/settings/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/logs/debug.log"
+    type: file
+    source: "backend/logs/debug.log.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/settings/base.py"
+    type: file
+    source: "backend/settings/base.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/settings/development.py"
+    type: file
+    source: "backend/settings/development.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/settings/production.py"
+    type: file
+    source: "backend/settings/production.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/asgi.py"
+    type: file
+    source: "backend/asgi.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/wsgi.py"
+    type: file
+    source: "backend/wsgi.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/celery.py"
+    type: file
+    source: "backend/celery.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/schema.py"
+    type: file
+    source: "backend/schema.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_backend/urls.py"
+    type: file
+    source: "backend/urls.py.j2"
+
+  # ============================================================
+  # 5. CACHE CORE APP - Caching and shared model utilities
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_cache_core"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/apps.py"
+    type: file
+    source: "cache_core/apps.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/admin.py"
+    type: file
+    source: "cache_core/admin.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/models.py"
+    type: file
+    source: "cache_core/models.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/signals.py"
+    type: file
+    source: "cache_core/cache_core_signals.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/tests.py"
+    type: file
+    source: "cache_core/tests.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/views.py"
+    type: file
+    source: "cache_core/views.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/migrations"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/migrations/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/management"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/management/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/management/commands"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/management/commands/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_cache_core/management/commands/list_all_models.py"
+    type: file
+    source: "apps/commands/list_all_models.py.j2"
+
+  # ============================================================
+  # 6. DTO - Data Transfer Objects
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_dto"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/audit_logs_dto.py"
+    type: file
+    source: "dto/audit_logs_dto.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/auth_dto.py"
+    type: file
+    source: "dto/auth_dto.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/enums.py"
+    type: file
+    source: "dto/enums.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/files_dto.py"
+    type: file
+    source: "dto/files_dto.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/notification_dto.py"
+    type: file
+    source: "dto/notification_dto.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/settings_dto.py"
+    type: file
+    source: "dto/settings_dto.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto/shared_dto.py"
+    type: file
+    source: "dto/shared_dto.py.j2"
+
+  # ============================================================
+  # 7. DTO BUILDERS - DTO construction and response builders
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders/audit_logs_dto.py"
+    type: file
+    source: "dto_builders/accounts_builder.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders/audit_logs_dto.py"
+    type: file
+    source: "dto_builders/audit_logs_dto.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders/auth_dto_builder.py"
+    type: file
+    source: "dto_builders/auth_dto_builder.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders/notifications_dto_builder.py"
+    type: file
+    source: "dto_builders/notifications_dto_builder.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_dto_builders/response_builder.py"
+    type: file
+    source: "dto_builders/response_builder.py.j2"
+
+  # ============================================================
+  # 8. MIXINS - Reusable mixins and base abstractions
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_mixins"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_mixins/__init__.py"
+    type: file
+    source: "mixins/__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_mixins/base_crud.py"
+    type: file
+    source: "mixins/base_crud.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_mixins/base_object.py"
+    type: file
+    source: "mixins/base_object.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_mixins/models.py"
+    type: file
+    source: "mixins/models.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_mixins/threshhold_filter_utils.py"
+    type: file
+    source: "mixins/threshold_filter_utils.py.j2"
+
+  # ============================================================
+  # 9. NOTIFICATIONS APP - Notification system with async tasks
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_notifications"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/apps.py"
+    type: file
+    source: "notifications/apps.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/admin.py"
+    type: file
+    source: "notifications/admin.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/models.py"
+    type: file
+    source: "notifications/models.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/constants.py"
+    type: file
+    source: "notifications/constants.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/schema.py"
+    type: file
+    source: "notifications/schema.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/signals.py"
+    type: file
+    source: "notifications/signals.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/tasks.py"
+    type: file
+    source: "notifications/tasks.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/tests.py"
+    type: file
+    source: "apps/tests.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/views.py"
+    type: file
+    source: "apps/views.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/migrations"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/migrations/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  # ============================================================
+  # 10. SETTINGS APP - Application settings and data seeding
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_settings"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/apps.py"
+    type: file
+    source: "settings/apps.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/admin.py"
+    type: file
+    source: "settings/admin.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/models.py"
+    type: file
+    source: "settings/models.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/schema.py"
+    type: file
+    source: "settings/schema.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/tests.py"
+    type: file
+    source: "settings/tests.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/views.py"
+    type: file
+    source: "settings/views.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/migrations"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/migrations/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/management"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/management/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/management/commands"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/management/commands/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_settings/management/commands/seed_locations.py"
+    type: file
+    source: "apps/commands/seed_locations.py.j2"
+
+  # ============================================================
+  # 11. HTMLS - HTML templates for emails and notifications
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_htmls"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_htmls/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_htmls/account_activation.html"
+    type: file
+    source: "htmls/account_activation.html.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_htmls/password-reset.html"
+    type: file
+    source: "htmls/password-reset.html.j2"
+
+  # ============================================================
+  # 12. UTILS - Shared utility modules
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_utils"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  # Cache utilities
+  - path: "{{ project_name }}/{{ package_name }}_utils/cache"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/cache/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/cache/decorators.py"
+    type: file
+    source: "utils/cache/decorators.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/cache/manager.py"
+    type: file
+    source: "utils/cache/manager.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/cache/utils.py"
+    type: file
+    source: "utils/cache/utils.py.j2"
+
+  # Decorator utilities
+  - path: "{{ project_name }}/{{ package_name }}_utils/decorators"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/decorators/__init__.py"
+    type: file
+    source: "utils/decorators/__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/decorators/log_exceptions.py"
+    type: file
+    source: "utils/decorators/log_exceptions.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/decorators/permissions.py"
+    type: file
+    source: "utils/decorators/permissions.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/decorators/scope.py"
+    type: file
+    source: "utils/decorators/scope.py.j2"
+
+  # Rate limit utilities
+  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit/decorators.py"
+    type: file
+    source: "utils/rate_limit/decorators.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit/middleware.py"
+    type: file
+    source: "utils/rate_limit/middleware.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/rate_limit/token_bucket.py"
+    type: file
+    source: "utils/rate_limit/token_bucket.py.j2"
+
+  # Validator utilities
+  - path: "{{ project_name }}/{{ package_name }}_utils/validators"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/validators/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/validators/input_validator.py"
+    type: file
+    source: "utils/validators/input_validator.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/validators/password_validator.py"
+    type: file
+    source: "utils/validators/password_validator.py.j2"
+
+  # Utility modules
+  - path: "{{ project_name }}/{{ package_name }}_utils/authentication.py"
+    type: file
+    source: "utils/authentication.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/cache_utils.py"
+    type: file
+    source: "utils/cache_utils.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/data_seeding.py"
+    type: file
+    source: "utils/data_seeding.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/features.py"
+    type: file
+    source: "utils/features.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/file_utils.py"
+    type: file
+    source: "utils/file_utils.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/generators.py"
+    type: file
+    source: "utils/generators.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/geo_location.py"
+    type: file
+    source: "utils/geo_location.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/log_exceptions.py"
+    type: file
+    source: "utils/log_exceptions.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/notification_utils.py"
+    type: file
+    source: "utils/notification_utils.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/pdf_creator.py"
+    type: file
+    source: "utils/pdf_creator.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/user_utils.py"
+    type: file
+    source: "utils/user_utils.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_utils/utils.py"
+    type: file
+    source: "utils/utils.py.j2"
+
+
+  # ============================================================
+  # 9. FILES APP - Application files
+  # ============================================================
+  - path: "{{ project_name }}/{{ package_name }}_files"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}__files/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_files/apps.py"
+    type: file
+    source: "files/apps.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_files/admin.py"
+    type: file
+    source: "files/admin.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_files/models.py"
+    type: file
+    source: "files/models.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_files/constants.py"
+    type: file
+    source: "files/constants.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_files/schema.py"
+    type: file
+    source: "files/schema.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_files/tests.py"
+    type: file
+    source: "files/tests.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_files/views.py"
+    type: file
+    source: "files/views.py.j2"
+
+  - path: "{{ project_name }}/{{ package_name }}_notifications/migrations"
+    type: dir
+
+  - path: "{{ project_name }}/{{ package_name }}_files/migrations/__init__.py"
+    type: file
+    source: "__init__.py.j2"
+
+
+  # ============================================================
+  # 14: APPLICATION LOGS
+  # ============================================================
+  - path: "{{ project_name }}/logs"
+    type: dir
+
+  - path: "{{ project_name }}/logs/debug.log"
+    type: file
+    source: "logs/debug.log.j2"
+
+  # ============================================================
+  # Documentation
+  # ============================================================
+  - path: "{{ project_name }}/docs"
+    type: dir
+
+  - path: "{{ project_name }}/docs/API.md"
+    type: file
+    source: "docs/API.md.j2"
+
+  - path: "{{ project_name }}/docs/ARCHITECTURE.md"
+    type: file
+    source: "docs/ARCHITECTURE.md.j2"
+
+  - path: "{{ project_name }}/docs/DEPLOYMENT.md"
+    type: file
+    source: "docs/DEPLOYMENT.md.j2"
+
+# Hooks execute shell scripts at specific points in the generation lifecycle
+hooks:
+  pre_gen:
+    script: "scripts/pre_gen.sh"
+    description: "Validates Python and Django installation"
+
+  post_gen:
+    script: "scripts/post_gen.sh"
+    description: "Creates virtual environment, installs dependencies, runs initial migrations"

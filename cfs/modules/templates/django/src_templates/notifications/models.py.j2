@@ -1,0 +1,89 @@
+import uuid
+
+from django.db import models
+from {{package_name}}_accounts.models import Profile
+from {{package_name}}_dto.enums import InAppNotificationTypeChoices, NotificationChannelsChoices
+from {{package_name}}_mixins.models import BaseModel
+
+
+class UnreadNotificationManager(models.Manager):
+    def get_queryset(self):
+        """Base queryset that filters for unread notifications (read_on is null)."""
+        return super().get_queryset().filter(read_on__isnull=True, is_active=True)
+
+    def for_receiver(self, receiver):
+        """Get unread notifications for a specific receiver."""
+        return self.get_queryset().filter(receiver=receiver)
+
+    def by_notification_type(self, notification_type):
+        """Get unread notifications of a specific type."""
+        return self.get_queryset().filter(notification_type=notification_type)
+
+    def for_receiver_by_type(self, receiver, notification_type):
+        """Get unread notifications for a specific receiver and type."""
+        return self.get_queryset().filter(receiver=receiver, notification_type=notification_type)
+
+    def count_unread(self, receiver):
+        """Count unread notifications for a specific receiver."""
+        return self.get_queryset().filter(receiver=receiver).count()
+
+
+class InAppNotifications(BaseModel):
+    message = models.TextField()
+    notification_type = models.CharField(
+        max_length=9000, null=False, choices=InAppNotificationTypeChoices.choices())
+    sender = models.ForeignKey(Profile, on_delete=models.CASCADE,
+                               related_name='sender_notifications', null=True, blank=True)
+    receiver = models.ForeignKey(Profile, on_delete=models.CASCADE,
+                                 related_name='in_app_notification_receiver', null=True, blank=True)
+    callback_item_id = models.CharField(max_length=9000, null=True, blank=True)
+    received_at = models.DateTimeField(null=True, blank=True)
+    read_on = models.DateTimeField(null=True, blank=True)
+    # Model Managers
+    objects = models.Manager()  # Default manager
+    unread = UnreadNotificationManager()  # Custom manager for unread notifications
+
+    class Meta:
+        db_table = '{{package_name}}_in_app_notifications'
+        ordering = ['-primary_key']
+        verbose_name_plural = '{{ package_name | replace('_', ' ') | upper }} IN-APP NOTIFICATIONS'
+
+    def __str__(self):
+        return '{} - {}'.format(self.primary_key, self.notification_type)
+
+
+class InAppNotificationReceivers(BaseModel):
+    viewed = models.BooleanField(default=False)
+    related_notification = models.ForeignKey(
+        InAppNotifications, null=True, on_delete=models.CASCADE, related_name='related_in_app_notification')
+    receiver = models.ForeignKey(Profile, null=True, blank=True,
+                                 on_delete=models.CASCADE, related_name='receiver_notifications')
+    recorded_on = models.DateTimeField(auto_now_add=True)
+    viewed_on = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return '{}-{}'.format(self.related_notification.title, self.receiver)
+
+    class Meta:
+        db_table = '{{package_name}}_in_app_notifications_receivers'
+        ordering = ['-primary_key']
+        verbose_name_plural = 'IN-APP NOTIFICATION RECEIVERS'
+
+
+class SystemNotifications(BaseModel):
+    notification_id = models.UUIDField(default=uuid.uuid4, unique=True)
+    channel = models.CharField(max_length=90, null=False, default=NotificationChannelsChoices.EMAIL.value,
+                               choices=NotificationChannelsChoices.choices())
+    payload = models.CharField(max_length=9999, null=False)
+    submitted_on = models.DateTimeField(null=True)
+    sent_on = models.DateTimeField(null=True)
+    is_sent = models.BooleanField(default=True)
+    error_message = models.CharField(max_length=9999, null=True)
+
+    def __str__(self):
+        return '{} - {}'.format(self.primary_key, self.channel)
+
+    class Meta:
+        db_table = '{{package_name}}_system_notifications'
+        ordering = ['-primary_key']
+        verbose_name_plural = 'SYSTEM NOTIFICATIONS'

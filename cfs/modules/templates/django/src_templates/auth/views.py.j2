@@ -1,0 +1,172 @@
+from django.shortcuts import render
+import graphene
+from {{package_name}}_dto.auth_dto import *
+from {{package_name}}_mixins.base_crud import handle_update_or_create, handle_create, handle_delete, handle_update
+from {{package_name}}_utils.decorators.permission import *
+from {{package_name}}_auth.models import *
+from {{package_name}}_dto_builders.auth_dto_builder import AuthBuilder
+from django.contrib.auth import authenticate
+from oauth2_provider.models import AccessToken, Application
+from datetime import timedelta
+from django.utils import timezone
+
+#---------USER ROLES--------
+class CreateUserRoleMutation(graphene.Mutation):
+    class Arguments:
+        input = UserRolesInputObject(required=True)
+
+    response = graphene.Field(ResponseObject)
+    data = graphene.Field(UserRolesObject)
+
+    @classmethod
+    # @has_mutation_access(permissions=['can_create_roles'])
+    def mutate(cls, root, info, input): 
+        response, data = handle_update_or_create(UserRoles, input, AuthBuilder.get_role_data, ['role_name','is_system_admin'], ['role_name'])
+        
+        permissions = []
+        if input.permissions is not None:
+            role = UserRoles.objects.filter(unique_id=data.unique_id).first()
+            for permission in input.permissions:
+                user_permission = UserPermissions.objects.filter(unique_id=permission).first()
+                if not user_permission:
+                    continue
+                query, _ = UserRolesPermissions.objects.update_or_create(
+                    role = role,
+                    permission = user_permission,
+                    defaults={
+                        "is_active": True 
+                    }
+                )
+                permissions.append(AuthBuilder.get_permission_data(id=query.permission.unique_id))
+
+        data.permissions = permissions
+        return cls(response=response, data=data)
+class LoginMutation(graphene.Mutation):
+    class Arguments:
+        username = graphene.String(required=True)
+        password = graphene.String(required=True)
+        client_id = graphene.String(required=True)
+        client_secret = graphene.String(required=True)
+
+    access_token = graphene.String()
+    refresh_token = graphene.String()
+    expires_in = graphene.Int()
+    token_type = graphene.String()
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, username, password, client_id, client_secret):
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+        if not user:
+            return LoginMutation(success=False, message="Invalid credentials")
+
+        # Verify application exists
+        try:
+            application = Application.objects.get(
+                client_id=client_id,
+                client_secret=client_secret
+            )
+        except Application.DoesNotExist:
+            return LoginMutation(success=False, message="Invalid client credentials")
+
+        # Create access token
+        expires = timezone.now() + timedelta(hours=1)
+        access_token = AccessToken.objects.create(
+            user=user,
+            application=application,
+            expires=expires,
+            token=AccessToken.generate_token()
+        )
+
+        return LoginMutation(
+            success=True,
+            access_token=access_token.token,
+            refresh_token=access_token.token,  # You might want to create a separate refresh token
+            expires_in=3600,
+            token_type="Bearer",
+            message="Login successful"
+        )
+class UpdateUserRoleMutation(graphene.Mutation):
+    class Arguments:
+        input=UserRolesInputObject(required= True)
+    response= graphene.Field(ResponseObject)
+    data=graphene.Field(UserRolesObject)
+
+    @classmethod
+    # @has_mutation_access(permissions=['can_update_roles'])
+    def mutate(cls, root, info, input):
+        role = UserRoles.objects.filter(unique_id=input.unique_id).first()
+
+        if not role:
+            return cls(response=ResponseObject.get_response(9))
+    
+        role.is_system_admin=role.is_system_admin or False
+        role.role_name= input.role_name
+        role.role_type= input.role_type
+        role.save()
+        data= AuthBuilder.get_role_data(role.unique_id)
+        return cls(response= ResponseObject.get_response(1), data=data)
+    
+class DeleteUserRoleMutation(graphene.Mutation):
+    class Arguments:
+        unique_id = graphene.String()
+
+    response = graphene.Field(ResponseObject)
+
+    @classmethod
+    # @has_mutation_access(permissions=['can_delete_roles'])
+    def mutate(cls, root, info, unique_id):
+        user_role = UserRoles.objects.filter(unique_id=unique_id).first()
+        if not user_role:
+            return cls(response=ResponseObject.get_response(id="9"))
+        
+        if user_role.assigned_users.count() > 0:
+            return cls(response=ResponseObject.get_response(id="9", message=f"Sorry you can not delete this role, there are {user_role.assigned_users.count()} user assigned to this role."))
+        
+        if user_role.is_system_admin:
+            return cls(response=ResponseObject.get_response(id="9", message="Sorry you can not delete super admin role"))
+        
+        response=handle_delete(UserRoles, unique_id)
+        if response.status:
+            UsersAssignedRoles.objects.filter(role=user_role).delete()
+        return cls(response=response)
+    
+class AssignOrRemoveUserRolePermissions(graphene.Mutation):
+    class Arguments:
+        input = PermissionAssignRemoveInput()
+        
+    response = graphene.Field(ResponseObject)
+
+    @classmethod
+    # @has_mutation_access(permissions=['can_manage_role_permissions'])
+    def mutate(cls, root, info, input):
+        user_role = UserRoles.objects.filter(unique_id=input.role_id).first()
+            
+        if not user_role:
+            return cls(response=ResponseObject.get_response(id="9"))
+        
+        for permission in input.assigned_permissions:
+            user_permission = UserPermissions.objects.filter(unique_id=permission).first()
+            if user_permission:
+                UserRolesPermissions.objects.update_or_create(
+                    role = user_role,
+                    permission = user_permission,
+                    defaults={
+                        "is_active": True 
+                    }
+                )
+        for permission in input.removed_permissions:
+            user_permission = UserPermissions.objects.filter(unique_id=permission).first()
+            if user_permission:
+                UserRolesPermissions.objects.filter( role = user_role, permission = user_permission, is_active=True).update(is_active=False)
+
+        return cls(response=ResponseObject.get_response(id="1"))
+  
+    
+class Mutation(graphene.ObjectType):
+    create_user_roles_mutation = CreateUserRoleMutation.Field()
+    login_muaion=LoginMutation.Field()
+    update_user_roles_mutation = UpdateUserRoleMutation.Field()
+    delete_user_roles_mutation = DeleteUserRoleMutation.Field()
+    assign_or_remove_role_permission_mutation = AssignOrRemoveUserRolePermissions.Field()

@@ -1,0 +1,38 @@
+from functools import wraps
+from typing import Callable
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.conf import settings
+import logging
+from {{package_name}}_utils.ratelimit.token_bucket import TokenBucket
+
+logger = logging.getLogger(__name__)
+
+
+def rate_limit_key(request: HttpRequest, view_func: Callable) -> str:
+    """Generate consistent rate limit key for decorator-based limits."""
+    client_ip = request.META.get('REMOTE_ADDR', 'unknown')
+    return f'token_bucket:view:{client_ip}:{view_func.__name__}'
+
+
+def token_bucket_rate_limit(max_tokens: int = 10, refill_interval_seconds: int = 60):
+    """Decorator to apply token bucket rate limiting to a Django view using Redis."""
+
+    def decorator(view_func: Callable) -> Callable:
+        @wraps(view_func)
+        def _wrapped_view(request: HttpRequest, *args, **kwargs) -> HttpResponse:
+            # Bypass rate limiting for excluded paths
+            exclude_paths = getattr(settings, 'RATELIMIT_EXCLUDE_PATHS', [])
+            if any(request.path.startswith(p) for p in exclude_paths):
+                return view_func(request, *args, **kwargs)
+
+            bucket_key = rate_limit_key(request, view_func)
+            token_bucket = TokenBucket(max_tokens=max_tokens, refill_interval_seconds=refill_interval_seconds)
+
+            if not token_bucket.consume(bucket_key, cost=1):
+                return JsonResponse({'error': 'Rate limit exceeded'}, status=429, headers={'Retry-After': str(refill_interval_seconds)})
+
+            return view_func(request, *args, **kwargs)
+
+        return _wrapped_view
+
+    return decorator

@@ -1,0 +1,70 @@
+<div style="display: flex; justify-content: space-between; align-items: center; width:100%;">
+  <img src="https://www.ega.go.tz/site/images/emblem.webp" alt="eGA Emblem" width="100"/>
+</div>
+
+---
+<h1 style="text-align: center">{{package_name}} Backend</h1>
+
+
+
+<p style="align: center">
+  <img alt="Python Version" src="https://img.shields.io/badge/python-3.11-blue">
+  <img alt="Django" src="https://img.shields.io/badge/django-5.2-success">
+  <img alt="License" src="https://img.shields.io/badge/license-eGA-lightgrey">
+</p>
+
+## Project Setup
+
+### 1. Clone the Project
+
+```bash
+http://102.223.8.140:9000/{{package_name}}/{{package_name}}_backend.git
+cd {{package_name}}_backend
+````
+
+### 2. Create & Activate Virtual Environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 🛠️ Environment Configuration
+
+Create a `.env` file in the root project directory:
+
+```env
+SECRET_KEY=your-secret-key
+DATABASE_NAME={{package_name}}_prod
+DATABASE_USER=postgres
+DATABASE_PASSWORD=securepassword
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DEV_DB_NAME=db.sqlite3
+
+GISP_API_URL=https://gisp.gov.tz/api
+SMS_API_URL=https://smsprovider/api/send
+```
+
+---
+
+## Running the App
+
+### Development Server
+
+```bash
+python manage.py runserver --settings={{package_name}}_backend.settings.development
+```
+
+## 📄 License
+
+© 2025 President’s Office – e-Government Authority (eGA). All Rights Reserved.
+

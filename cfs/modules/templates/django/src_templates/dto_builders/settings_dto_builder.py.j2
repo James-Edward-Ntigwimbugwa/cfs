@@ -1,0 +1,80 @@
+from {{package_name}}_dto.settings_dto import FullLocationObject, LocationsObject
+from {{package_name}}_settings.models import Districts, Regions, Streets, Wards
+
+
+class SettingsBuilder:
+    @classmethod
+    def get_region_data(cls, id):
+        region = Regions.objects.filter(unique_id=id).first()
+
+        location_object = LocationsObject(
+            id=region.primary_key,
+            unique_id=region.unique_id,
+            name=region.region_name,
+            code=region.region_code,
+        )
+
+        return location_object
+
+    @classmethod
+    def get_district_data(cls, id):
+        query_set = Districts.objects.filter(unique_id=id).first()
+
+        district_object = LocationsObject(
+            id=query_set.primary_key,
+            unique_id=query_set.unique_id,
+            name=query_set.district_name,
+            code=query_set.district_code,
+        )
+
+        return district_object
+
+    @classmethod
+    def get_ward_data(cls, id):
+        query_set = Wards.objects.filter(unique_id=id).first()
+
+        ward_object = LocationsObject(
+            id=query_set.primary_key,
+            unique_id=query_set.unique_id,
+            name=query_set.ward_name,
+            code=query_set.ward_code,
+        )
+
+        return ward_object
+
+    @classmethod
+    def get_street_data(cls, id):
+        street = Streets.objects.filter(unique_id=id).first()
+
+        street_object = LocationsObject(
+            id=street.pk,
+            unique_id=street.unique_id,
+            name=street.street_name,
+            code=street.street_code,
+        )
+
+        return street_object
+    
+    @classmethod
+    def get_full_location_data(cls, id):
+        location = Streets.objects.filter(unique_id=id).select_related(
+            'street_ward',
+            'street_ward__ward_district',
+            'street_ward__ward_district__district_region'
+        ).only(
+            'street_name',
+            'street_ward__ward_name',
+            'street_ward__ward_district__district_name',
+            'street_ward__ward_district__district_region__region_name'
+        ).first()
+
+        if not location:
+            return None
+
+        return FullLocationObject(
+            street_unique_id=id,
+            street=location.street_name,
+            ward=location.street_ward.ward_name,
+            district=location.street_ward.ward_district.district_name,
+            region=location.street_ward.ward_district.district_region.region_name
+        )

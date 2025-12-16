@@ -1,0 +1,66 @@
+from django.db import models
+from {{package_name}}_dto.enums import RoleTyeChoices
+from {{package_name}}_mixins.models import BaseModel
+from django.contrib.auth.models import User
+
+class UserRoles(BaseModel):
+    role_name = models.CharField(default='', max_length=1600)
+    is_system_admin = models.BooleanField(default=False)
+    role_type = models.CharField(max_length=255, choices=RoleTyeChoices.choices(), null=True, blank=True)
+
+    class Meta:
+        db_table = '{{ package_name }}_roles'
+        ordering = ['-primary_key']
+        verbose_name_plural = "ROLES"
+
+    def __str__(self):
+        return "{} - {}".format(self.role_name, self.role_type)
+
+    @property
+    def get_role_permissions(self):
+        UserRolesPermissions.objects.filter(role=self).first()
+        return UserRolesPermissions.objects.filter(role=self)
+    
+class UserPermissionsGroup(BaseModel):
+    group_name = models.CharField(default='', max_length=1600)
+    group_description = models.CharField(default='', max_length=600, null=True)
+    class Meta:
+        db_table = '{{ package_name }}_permissions_group'
+        ordering = ['-primary_key']
+        verbose_name_plural = "PERMISSIONS GROUP"
+
+    def __str__(self):
+        return "{} - {}".format(self.group_name, self.group_description)
+    
+class UserPermissions(BaseModel):
+    permission_name = models.CharField(default='', max_length=1600)
+    permission_code = models.CharField(default='', max_length=1600)
+    permission_group = models.ForeignKey(UserPermissionsGroup, null=True, blank=True, related_name='permission_group', on_delete=models.CASCADE)
+    is_global = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = '{{ package_name }}_permissions'
+        ordering = ['-primary_key']
+        verbose_name_plural = "PERMISSIONS"
+
+    def __str__(self):
+        return "{} - {}".format(self.permission_name, self.permission_group)
+    
+class UserRolesPermissions(BaseModel):
+    role = models.ForeignKey(UserRoles, related_name='role_permission', on_delete=models.CASCADE)
+    permission = models.ForeignKey(UserPermissions, related_name='permission_role', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = '{{ package_name }}_role_permissions'
+        ordering = ['-primary_key']
+        verbose_name_plural = "ROLES PERMISSIONS"
+
+
+class UsersAssignedRoles(BaseModel):
+    role = models.ForeignKey(UserRoles, related_name='assigned_users', on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name='user_role', on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = '{{ package_name }}_user_assigned_roles'
+        ordering = ['-primary_key']
+        verbose_name_plural = "USERS ASSIGNED ROLES"

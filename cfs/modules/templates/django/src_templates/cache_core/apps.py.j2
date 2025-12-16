@@ -1,0 +1,8 @@
+from django.apps import AppConfig
+
+
+class {{ package_name|title|replace('_', '') }}CacheCoreConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = '{{package_name}}_cache_core'
+    def ready(self):
+        import {{package_name}}_cache_core.signals

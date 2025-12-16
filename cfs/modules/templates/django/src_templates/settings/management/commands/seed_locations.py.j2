@@ -1,0 +1,279 @@
+import warnings
+import csv
+from django.core.management import BaseCommand
+from django.db import transaction
+from django.db.utils import IntegrityError
+from {{package_name}}_settings.models import Regions, Districts, Wards, Streets
+
+region_path = "{{package_name}}_assets/locations/Regions.csv"
+district_path = "{{package_name}}_assets/locations/Districts.csv"
+ward_path = "{{package_name}}_assets/locations/Wards.csv"
+street_path = "{{package_name}}_assets/locations/Streets.csv"
+
+warnings.filterwarnings("ignore")
+
+
+class Command(BaseCommand):
+    help = 'Populate location data from CSV files'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--file_path",
+            type=str,
+            help="Path to the directory containing CSV files"
+        )
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Force update existing records"
+        )
+
+    def handle(self, *args, **options):
+        force_update = options.get('force', False)
+
+        stats = {
+            'regions': {'created': 0, 'skipped': 0, 'updated': 0},
+            'districts': {'created': 0, 'skipped': 0, 'updated': 0},
+            'wards': {'created': 0, 'skipped': 0, 'updated': 0},
+            'streets': {'created': 0, 'skipped': 0, 'updated': 0},
+        }
+
+        try:
+            # Import Regions
+            self.stdout.write("Importing Regions...")
+            stats['regions'] = self._import_regions(region_path, force_update)
+
+            # Import Districts
+            self.stdout.write("Importing Districts...")
+            stats['districts'] = self._import_districts(
+                district_path, force_update)
+
+            # Import Wards
+            self.stdout.write("Importing Wards...")
+            stats['wards'] = self._import_wards(ward_path, force_update)
+
+            # Import Streets
+            self.stdout.write("Importing Streets...")
+            stats['streets'] = self._import_streets(street_path, force_update)
+
+            # Display summary
+            self._display_summary(stats)
+
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(
+                f"Error during import: {str(e)}"))
+            raise
+
+    def _import_regions(self, file_path, force_update):
+        created = 0
+        skipped = 0
+        updated = 0
+
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                region_napa_id = row["reginal_uniqueID"].strip()
+
+                # Check if exists
+                existing = Regions.objects.filter(
+                    region_napa_id=region_napa_id).first()
+
+                if existing:
+                    if force_update:
+                        # Update existing
+                        existing.region_name = row["reginal_name"].strip()
+                        existing.region_code = row["reginal_code"].strip()
+                        existing.save()
+                        updated += 1
+                        self.stdout.write(f"  Updated: {existing.region_name}")
+                    else:
+                        skipped += 1
+                        self.stdout.write(self.style.WARNING(
+                            f"  Skipped (exists): {row['reginal_name'].strip()}"
+                        ))
+                else:
+                    # Create new
+                    region = Regions.objects.create(
+                        region_napa_id=region_napa_id,
+                        region_name=row["reginal_name"].strip(),
+                        region_code=row["reginal_code"].strip(),
+                    )
+                    created += 1
+                    self.stdout.write(self.style.SUCCESS(
+                        f"  Created: {region.region_name}"))
+
+        return {'created': created, 'skipped': skipped, 'updated': updated}
+
+    def _import_districts(self, file_path, force_update):
+        created = 0
+        skipped = 0
+        updated = 0
+
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                district_napa_id = row["distric_uniqueID"].strip()
+
+                try:
+                    region = Regions.objects.get(
+                        region_napa_id=row["parent_region"])
+                except Regions.DoesNotExist:
+                    self.stdout.write(self.style.ERROR(
+                        f"  Error: Region not found for district {row['distric_name'].strip()}"
+                    ))
+                    continue
+
+                # Check if exists
+                existing = Districts.objects.filter(
+                    district_napa_id=district_napa_id).first()
+
+                if existing:
+                    if force_update:
+                        existing.district_name = row["distric_name"].strip()
+                        existing.district_code = row["distric_code"].strip()
+                        existing.district_region = region
+                        existing.save()
+                        updated += 1
+                        self.stdout.write(
+                            f"  Updated: {existing.district_name}")
+                    else:
+                        skipped += 1
+                        self.stdout.write(self.style.WARNING(
+                            f"  Skipped (exists): {row['distric_name'].strip()}"
+                        ))
+                else:
+                    district = Districts.objects.create(
+                        district_napa_id=district_napa_id,
+                        district_name=row["distric_name"].strip(),
+                        district_code=row["distric_code"].strip(),
+                        district_region=region,
+                    )
+                    created += 1
+                    self.stdout.write(self.style.SUCCESS(
+                        f"  Created: {district.district_name}"))
+
+        return {'created': created, 'skipped': skipped, 'updated': updated}
+
+    def _import_wards(self, file_path, force_update):
+        created = 0
+        skipped = 0
+        updated = 0
+
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                ward_napa_id = row["ward_uniqueID"].strip()
+
+                try:
+                    district = Districts.objects.get(
+                        district_napa_id=row["parent_distric"])
+                except Districts.DoesNotExist:
+                    self.stdout.write(self.style.ERROR(
+                        f"  Error: District not found for ward {row['ward_name'].strip()}"
+                    ))
+                    continue
+
+                # Check if exists
+                existing = Wards.objects.filter(
+                    ward_napa_id=ward_napa_id).first()
+
+                if existing:
+                    if force_update:
+                        existing.ward_name = row["ward_name"].strip()
+                        existing.ward_code = row["ward_code"].strip()
+                        existing.ward_district = district
+                        existing.save()
+                        updated += 1
+                        self.stdout.write(f"  Updated: {existing.ward_name}")
+                    else:
+                        skipped += 1
+                        self.stdout.write(self.style.WARNING(
+                            f"  Skipped (exists): {row['ward_name'].strip()}"
+                        ))
+                else:
+                    ward = Wards.objects.create(
+                        ward_napa_id=ward_napa_id,
+                        ward_name=row["ward_name"].strip(),
+                        ward_code=row["ward_code"].strip(),
+                        ward_district=district,
+                    )
+                    created += 1
+                    self.stdout.write(self.style.SUCCESS(
+                        f"  Created: {ward.ward_name}"))
+
+        return {'created': created, 'skipped': skipped, 'updated': updated}
+
+    def _import_streets(self, file_path, force_update):
+        created = 0
+        skipped = 0
+        updated = 0
+
+        with open(file_path, "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                street_napa_id = row["street_uniqueID"].strip()
+
+                try:
+                    ward = Wards.objects.get(ward_napa_id=row["parent_ward"])
+                except Wards.DoesNotExist:
+                    self.stdout.write(self.style.ERROR(
+                        f"  Error: Ward not found for street {row['street_name'].strip()}"
+                    ))
+                    continue
+
+                # Check if exists
+                existing = Streets.objects.filter(
+                    street_napa_id=street_napa_id).first()
+
+                if existing:
+                    if force_update:
+                        existing.street_name = row["street_name"].strip()
+                        existing.street_code = row["street_code"].strip()
+                        existing.street_ward = ward
+                        existing.save()
+                        updated += 1
+                        self.stdout.write(f"  Updated: {existing.street_name}")
+                    else:
+                        skipped += 1
+                        self.stdout.write(self.style.WARNING(
+                            f"  Skipped (exists): {row['street_name'].strip()}"
+                        ))
+                else:
+                    street = Streets.objects.create(
+                        street_napa_id=street_napa_id,
+                        street_name=row["street_name"].strip(),
+                        street_code=row["street_code"].strip(),
+                        street_ward=ward,
+                    )
+                    created += 1
+                    self.stdout.write(self.style.SUCCESS(
+                        f"  Created: {street.street_name}"))
+
+        return {'created': created, 'skipped': skipped, 'updated': updated}
+
+    def _display_summary(self, stats):
+        self.stdout.write("\n" + "="*60)
+        self.stdout.write(self.style.SUCCESS("IMPORT SUMMARY"))
+        self.stdout.write("="*60)
+
+        for model_name, counts in stats.items():
+            self.stdout.write(f"\n{model_name.upper()}:")
+            self.stdout.write(self.style.SUCCESS(
+                f"  ✓ Created: {counts['created']}"))
+            self.stdout.write(self.style.WARNING(
+                f"  ⊘ Skipped: {counts['skipped']}"))
+            self.stdout.write(f"  ↻ Updated: {counts['updated']}")
+
+        total_created = sum(s['created'] for s in stats.values())
+        total_skipped = sum(s['skipped'] for s in stats.values())
+        total_updated = sum(s['updated'] for s in stats.values())
+
+        self.stdout.write("\n" + "="*60)
+        self.stdout.write(f"TOTAL:")
+        self.stdout.write(self.style.SUCCESS(f"  ✓ Created: {total_created}"))
+        self.stdout.write(self.style.WARNING(f"  ⊘ Skipped: {total_skipped}"))
+        self.stdout.write(f"  ↻ Updated: {total_updated}")
+        self.stdout.write("="*60 + "\n")
+
+        self.stdout.write(self.style.SUCCESS(
+            "Database populated successfully. 🌱" * 10))

@@ -1,0 +1,19 @@
+import graphene
+from {{package_name}}_dto.shared_dto import ResponseObject
+
+
+class SayHelloFromAuditLogsMutation(graphene.Mutation):
+    class Arguments:
+        name = graphene.String(default_value='Stranger')
+
+    response = graphene.Field(ResponseObject)
+    data = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, name):
+        return cls(response=ResponseObject.get_response(id='1'), data=f'Hello {name}')
+
+
+class Mutation(graphene.ObjectType):
+    say_from_audit_log_hello = SayHelloFromAuditLogsMutation.Field()
+
