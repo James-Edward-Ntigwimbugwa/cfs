@@ -46,7 +46,8 @@ echo -e "${BLUE}Installing core Django packages...${NC}"
 CORE_PACKAGES=(
     "django"
     "djangorestframework"
-    "django-cors-headers"
+    "django-cors-middleware" #
+    "django-cors-headers>=4.3,<5.0"
     "django-environ"
     "python-decouple"
     "psycopg2-binary"
@@ -65,9 +66,8 @@ CORE_PACKAGES=(
     "django-debug-toolbar" #debugger
     "django-oauth-toolkit" #oauth2
     "Jinja2" #Python Jinja
-    "django-cors-middleware" #cors-middleware
-    "django-cors-headers>=4.3,<5.0"
 )
+
 for package in "${CORE_PACKAGES[@]}"; do
     echo -e "  ${YELLOW}→${NC} Installing $package..."
     if pip install "$package" > /dev/null 2>&1; then
