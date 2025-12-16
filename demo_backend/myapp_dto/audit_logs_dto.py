@@ -1,0 +1,116 @@
+import graphene
+
+from myapp_dto.enums import AccountsTypeEnum
+from myapp_dto.shared_dto import PageObject, ResponseObject
+from myapp_mixins.base_object import BaseFilteringObject, BaseObject
+
+
+class ProfileInputObject(graphene.InputObjectType):
+    unique_id = graphene.String()
+    first_name = graphene.String()
+    last_name = graphene.String()
+    email = graphene.String()
+    password = graphene.String()
+    confirm_password = graphene.String()
+    phone_number = graphene.String()
+    location = graphene.String()
+
+
+class ProfileObject(BaseObject):
+    first_name = graphene.String()
+    last_name = graphene.String()
+    email = graphene.String()
+    phone_number = graphene.String()
+    location = graphene.String()
+    is_verified = graphene.Boolean()
+    phone_verified = graphene.Boolean()
+    account_type = graphene.String()
+    role = graphene.Field('myapp_dto.auth_dto.UserRolesObject')
+
+
+class ProfileResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    page = graphene.Field(PageObject)
+    data = graphene.List(ProfileObject)
+
+
+class MyProfileResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    data = graphene.Field(ProfileObject)
+
+
+class ProfileFilteringInput(BaseFilteringObject):
+    email = graphene.String()
+    is_verified = graphene.Boolean()
+    personal_profile = graphene.Boolean()
+    account_type = AccountsTypeEnum
+
+
+class MyProfileResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    data = graphene.Field(ProfileObject)
+
+
+class MyProfileResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    data = graphene.Field(ProfileObject)
+
+
+class ActivateOrDeactivateUserInput(graphene.InputObjectType):
+    unique_id = graphene.String()
+    deactivate = graphene.Boolean()
+
+
+class ChangePasswordInputObject(graphene.InputObjectType):
+    old_password = graphene.String()
+    new_password = graphene.String()
+
+
+class SetOrResetPasswordInputObject(graphene.InputObjectType):
+    request_token = graphene.String()
+    password = graphene.String()
+    phone_number = graphene.String()
+
+
+class UsersFilteringObject(BaseFilteringObject):
+    state_unique_id = graphene.String()
+    account_type = graphene.List(AccountsTypeEnum)
+    manufacture_unique_id = graphene.String()
+
+
+class ActivateOrDeactivateInstitutionUserInput(graphene.InputObjectType):
+    user_unique_id = graphene.String()
+    deactivate_user = graphene.Boolean()
+
+
+class ResetPasswordInputObject(graphene.InputObjectType):
+    request_token = graphene.String()
+    password = graphene.String()
+
+
+class CaptchaType(graphene.ObjectType):
+    image = graphene.String()
+    text = graphene.String()
+
+
+class CaptchaResponseObject(graphene.ObjectType):
+    data = graphene.Field(CaptchaType)
+    response = graphene.Field(ResponseObject)
+
+
+# Signup with GMS
+class SignupWithGMSInputObject(graphene.InputObjectType):
+    gms_email = graphene.String(required=True)
+    phone_number = graphene.String(required=True)
+
+
+class SignupWithGMSResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    data = graphene.Field(ProfileObject)
+
+
+class OTPVerificationInputObject(graphene.InputObjectType):
+    phone_number = graphene.String(required=True)
+    otp = graphene.String(required=True)
+
+

@@ -1,0 +1,54 @@
+from typing import Callable
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.conf import settings
+import logging
+from myapp_utils.ratelimit.token_bucket import TokenBucket
+
+logger = logging.getLogger(__name__)
+
+
+def middleware_key(request: HttpRequest) -> str:
+    """Generate consistent rate limit key for middleware."""
+    client_ip = request.META.get('REMOTE_ADDR', 'unknown')
+    return f'token_bucket:middleware:{client_ip}'
+
+
+class TokenBucketMiddleware:
+    def __init__(self, get_response: Callable):
+        self.get_response = get_response
+        self._load_config()
+
+    def _load_config(self) -> None:
+        """Initialize configuration from Django settings."""
+        config = getattr(
+            settings,
+            'RATELIMIT',
+            {
+                'MAX_TOKENS': 100,
+                'REFILL_INTERVAL': 60,
+                'EXCLUDE_PATHS': ['/admin/', '/health/'],
+            },
+        )
+        self.token_bucket = TokenBucket(max_tokens=config.get('MAX_TOKENS', 100), refill_interval_seconds=config.get('REFILL_INTERVAL', 60))
+        self.exclude_paths = config.get('EXCLUDE_PATHS', [])
+        self.enabled = config.get('ENABLED', True)
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        if not self.enabled:
+            return self.get_response(request)
+
+        if any(request.path.startswith(p) for p in self.exclude_paths):
+            return self.get_response(request)
+
+        bucket_key = middleware_key(request)
+
+        if not self.token_bucket.consume(bucket_key, cost=1):
+            return JsonResponse(
+                {'error': 'Rate limit exceeded'},
+                status=429,
+                headers={
+                    'Retry-After': str(self.token_bucket.refill_interval),
+                },
+            )
+
+        return self.get_response(request)

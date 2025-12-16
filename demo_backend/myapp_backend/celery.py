@@ -1,0 +1,24 @@
+import os
+from celery import Celery
+from dotenv import dotenv_values
+config = dotenv_values('.env')
+
+
+# Set default settings module for Celery
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", config.get('DJANGO_SETTINGS_MODULE','myapp_backend.settings.local'))
+
+celery_app = Celery("myapp_backend")
+
+# Load task modules from all registered Django app configs.
+celery_app.config_from_object("django.conf:settings", namespace="CELERY")
+
+# Autodiscover tasks in installed apps
+celery_app.autodiscover_tasks()
+
+
+# celery_app.conf.beat_schedule = {
+#     'check-missing-state-plans-daily': {
+#         'task': 'myapp_notifications.tasks.send_due_plan_reminders',
+#         'schedule': crontab(hour=8, minute=0),
+#     },
+# }

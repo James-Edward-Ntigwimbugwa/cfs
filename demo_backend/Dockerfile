@@ -1,0 +1,56 @@
+FROM 172.17.17.84:8080/python
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1  
+ENV PYTHONUNBUFFERED=1         
+# Set the working directory in the container
+WORKDIR /app
+
+# Install system dependencies required for python-ldap
+RUN apt-get update && apt-get install -y \
+  pkg-config \
+  libdbus-1-dev \
+  libglib2.0-dev \
+  libbrlapi-dev \
+  libldap2-dev \
+  build-essential \
+  python3-dev \
+  libsasl2-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+
+
+RUN apt-get update && apt-get install -y \
+  libcairo2 \
+  libpango-1.0-0 \
+  libpangocairo-1.0-0 \
+  libgdk-pixbuf-xlib-2.0-0 \
+  libffi-dev \
+  shared-mime-info
+
+
+# Copy only the requirements file first to leverage Docker's caching mechanism
+COPY requirements.txt /app/
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+  gcc \
+  libmagic1 \
+  libpq-dev \
+  && rm -rf /var/lib/apt/lists/*
+# Install dependencies
+RUN pip install --upgrade pip
+RUN pip install -v --no-cache-dir -r requirements.txt
+# Copy the rest of the application code
+COPY . /app/
+
+RUN python3 manage.py makemigrations --settings=myapp_backend.settings.production
+RUN python3 manage.py migrate --settings=myapp_backend.settings.production
+# Expose the port Django runs on
+
+VOLUME ["/app/myapp_assets"]
+
+EXPOSE 8000
+# Run migrations and start the Django development server
+CMD ["python", "manage.py", "runserver", "--settings=myapp_backend.settings.production", "0.0.0.0:8000"]
+
+

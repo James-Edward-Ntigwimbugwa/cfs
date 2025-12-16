@@ -1,0 +1,95 @@
+import time
+import json
+import logging
+from dataclasses import dataclass
+from typing import Any
+from redis import RedisError
+from myapp_utils.cache_utils import get_redis_client
+
+logger = logging.getLogger(__name__)
+redis_client = get_redis_client()
+
+CONSUME_SCRIPT = """
+local bucket = redis.call('GET', KEYS[1])
+local max_tokens = tonumber(ARGV[1])
+local refill_interval = tonumber(ARGV[2])
+local cost = tonumber(ARGV[3])
+local now = tonumber(ARGV[4])
+
+if not bucket then
+    bucket = {count = max_tokens, refilled_at = now}
+else
+    bucket = cjson.decode(bucket)
+end
+
+local time_passed = now - bucket.refilled_at
+local refill = math.floor(time_passed / refill_interval)
+if refill > 0 then
+    bucket.count = math.min(bucket.count + refill, max_tokens)
+    bucket.refilled_at = now - (time_passed % refill_interval)
+end
+
+if bucket.count >= cost then
+    bucket.count = bucket.count - cost
+    redis.call('SETEX', KEYS[1], refill_interval * 2, cjson.encode(bucket))
+    return 1
+else
+    redis.call('SETEX', KEYS[1], refill_interval * 2, cjson.encode(bucket))
+    return 0
+end
+"""
+
+
+@dataclass
+class BucketState:
+    count: int
+    refilled_at: float
+
+
+class TokenBucket:
+    def __init__(self, max_tokens: int, refill_interval_seconds: int):
+        self.max = max_tokens
+        self.refill_interval = refill_interval_seconds
+        self.redis_enabled = True
+        self.consume_script = redis_client.register_script(CONSUME_SCRIPT)
+
+    def consume(self, key: Any, cost: int = 1) -> bool:
+        """Atomically consume tokens using Lua script."""
+        if not self.redis_enabled:
+            logger.warning('Redis disabled, bypassing rate limit')
+            return True
+
+        try:
+            result = self.consume_script(keys=[key], args=[self.max, self.refill_interval, cost, time.time()])
+            return bool(result)
+        except RedisError as e:
+            logger.error(f'Redis error: {str(e)}. Disabling rate limiting.')
+            self.redis_enabled = False
+            return True
+        except Exception as e:
+            logger.error(f'Unexpected error in rate limiting: {str(e)}')
+            return True
+
+    def check(self, key: Any, cost: int = 1) -> bool:
+        """Check token availability without consuming (Not atomic)."""
+        if not self.redis_enabled:
+            return True
+
+        try:
+            bucket_data = redis_client.get(key)
+            if not bucket_data:
+                return self.max >= cost
+
+            bucket = json.loads(bucket_data)
+            now = time.time()
+            time_passed = now - bucket['refilled_at']
+            refill = int(time_passed // self.refill_interval)
+
+            if refill > 0:
+                new_count = min(bucket['count'] + refill, self.max)
+                return new_count >= cost
+
+            return bucket['count'] >= cost
+        except Exception as e:
+            logger.error(f'Check failed: {str(e)}')
+            return True

@@ -1,0 +1,132 @@
+import hashlib
+import json
+import logging
+import uuid
+from typing import Any, Union
+
+import redis
+from dotenv import dotenv_values
+from graphql import FieldNode, GraphQLResolveInfo, Node, SelectionSetNode, print_ast
+
+from myapp_utils.user_utils import UserUtils
+
+logger = logging.getLogger(__name__)
+
+config = dotenv_values('.env')
+CACHE_TIMEOUT = int(config.get('CACHE_TIMEOUT', 3600))
+
+
+def is_valid_uuid(value: Any) -> bool:
+    """Check if the value is a valid UUID."""
+    try:
+        uuid.UUID(str(value))
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
+def get_redis_client() -> redis.Redis:
+    return redis.from_url(config['REDIS_URL'])
+
+
+def sort_graphql_ast(node: Node):
+    """Recursively sort GraphQL AST fields by name."""
+    if isinstance(node, SelectionSetNode):
+        sorted_selections = sorted([sort_graphql_ast(selection) for selection in node.selections], key=lambda s: s.name.value if hasattr(s, 'name') else '')
+        return SelectionSetNode(selections=sorted_selections)
+
+    if isinstance(node, FieldNode):
+        return FieldNode(
+            name=node.name,
+            alias=node.alias,
+            arguments=sorted(node.arguments, key=lambda a: a.name.value),
+            directives=node.directives,
+            selection_set=sort_graphql_ast(node.selection_set) if node.selection_set else None,
+        )
+    return node
+
+
+def extract_vary_headers(
+    info: GraphQLResolveInfo,
+    headers_to_include: tuple[str, ...] | None = None,
+) -> dict[str, str]:
+    """Extract and normalize vary headers from request context (like Accept-Language, User-Agent)."""
+    try:
+        headers = getattr(info.context, 'headers', {}) or {}
+        # If headers is a dictionary-like object
+        if callable(getattr(headers, 'get', None)):
+            return {key: headers.get(key, '').strip() for key in headers_to_include or []}
+    except Exception as e:
+        logger.debug(f'Failed to extract vary headers: {e}', exc_info=True)
+
+    return {}
+
+
+def minify_graphql_query(query_str: str) -> str:
+    """Remove extra whitespace and newlines from GraphQL query."""
+    return ' '.join(query_str.strip().split())
+
+
+def safe_json_dumps(data: Any) -> str:
+    """Deterministically serialize data to JSON with fallback."""
+    try:
+        return json.dumps(data, sort_keys=True, separators=(',', ':'))
+    except json.JSONDecodeError as e:
+        logger.debug(f'JSON serialization failed: {e}')
+        return str(data)
+
+
+def parse_user_data(user: Union[str, dict, Any] | None) -> dict[str, Any]:
+    """Normalize user data for cache key generation"""
+    if not user:
+        return {'unique_id': None}
+
+    try:
+        if isinstance(user, str):
+            user_dict = json.loads(user)
+        elif isinstance(user, dict):
+            user_dict = user
+        else:
+            user_dict = vars(user)
+    except Exception as e:
+        logger.debug(f'User data parsing failed: {e}')
+        return {'unique_id': None}
+    return {'unique_id': user_dict.get('unique_id')}
+
+
+def create_cache_key(
+    prefix: str,
+    args: tuple,
+    kwargs: dict[str, Any],
+    info: GraphQLResolveInfo,
+    vary_headers: tuple[str, ...] = ('Accept-Language', 'User-Agent', 'Authorization'),
+) -> str:
+    """Generate a consistent, secure, and context-aware cache key."""
+    try:
+        field_node: FieldNode = info.field_nodes[0]  # Main query field
+        canonical_ast = sort_graphql_ast(field_node)
+        query_canonical = print_ast(canonical_ast)
+        query_minified = minify_graphql_query(query_canonical)
+
+        variables = getattr(info, 'variable_values', {}) or {}
+        user = UserUtils.get_user(info.context) or None
+        context_data = parse_user_data(user)
+
+        # Vary header context
+        header_context = extract_vary_headers(info, vary_headers)
+        key_components = [
+            prefix,
+            safe_json_dumps(args),
+            safe_json_dumps(kwargs),
+            safe_json_dumps(variables),
+            safe_json_dumps(context_data),
+            safe_json_dumps(header_context),
+            query_minified,
+        ]
+
+        full_key_str = '||'.join(key_components)
+        return hashlib.sha256(full_key_str.encode('utf-8')).hexdigest()
+
+    except Exception as e:
+        logger.critical(f'Cache key generation failed: {e}', exc_info=True)
+        raise

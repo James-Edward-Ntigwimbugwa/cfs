@@ -1,0 +1,163 @@
+distric_id,distric_name,distric_uniqueID,distric_code,parent_region
+162,     Monduli     ,1,     AR01     ,1
+163,     Meru     ,2,     AR02     ,1
+164,     Arusha     ,3,     AR03     ,1
+165,     Ngorongoro     ,4,     AR04     ,1
+166,     Longido     ,5,     AR05     ,1
+167,     Kinondoni     ,6,     DA01     ,2
+168,     Ilala     ,7,     DA02     ,2
+169,     Temeke     ,8,     DA03     ,2
+170,     Ubungo     ,9,     DA04     ,2
+171,     Kigamboni     ,10,     DA05     ,2
+172,     Kondoa Urban     ,11,     DO01     ,3
+173,     Mpwapwa     ,12,     DO02     ,3
+174,     Kongwa     ,13,     DO03     ,3
+175,     Dodoma     ,14,     DO04     ,3
+176,     Bahi     ,15,     DO05     ,3
+177,     Chamwino     ,16,     DO06     ,3
+178,     Chemba     ,17,     DO07     ,3
+179,     Iringa     ,18,     IR01     ,4
+180,     Mufindi     ,19,     IR02     ,4
+181,     Kilolo     ,20,     IR03     ,4
+182,     Kibondo     ,21,     KG01     ,5
+183,     Uvinza     ,22,     KG06     ,5
+184,     Kasulu     ,23,     KG02     ,5
+185,     Buhigwe     ,24,     KG04     ,5
+186,     Kigoma     ,25,     KG03     ,5
+187,     Rombo     ,26,     KJ01     ,6
+188,     Mwanga     ,27,     KJ02     ,6
+189,     Same     ,28,     KJ03     ,6
+190,     Moshi     ,29,     KJ04     ,6
+191,     Hai     ,30,     KJ05     ,6
+192,     Siha     ,31,     KJ06     ,6
+193,     Karagwe     ,32,     KR01     ,7
+194,     Bukoba     ,33,     KR02     ,7
+195,     Muleba     ,34,     KR03     ,7
+196,     Biharamulo     ,35,     KR04     ,7
+197,     Ngara     ,36,     KR05     ,7
+198,     Misenyi     ,37,     KR06     ,7
+199,     Kyerwa     ,38,     KR07     ,7
+200,     Mpanda     ,39,     KT01     ,8
+201,     Mlele     ,40,     KT02     ,8
+202,     Tanganyika     ,41,     KT03     ,8
+203,     Kilwa     ,42,     LD01     ,9
+204,     Lindi     ,43,     LD02     ,9
+205,     Liwale     ,44,     LD03     ,9
+206,     Ruangwa     ,45,     LD04     ,9
+207,     Nachingwea     ,46,     LD05     ,9
+208,     Chunya     ,47,     MB01     ,10
+209,     Mbarali     ,48,     MB02     ,10
+210,     Mbeya     ,49,     MB03     ,10
+211,     Rungwe     ,50,     MB04     ,10
+212,     Kyela     ,51,     MB05     ,10
+213,     Simanjiro     ,52,     MN01     ,11
+214,     Kiteto     ,53,     MN02     ,11
+215,     Mbulu     ,54,     MN03     ,11
+216,     Babati     ,55,     MN04     ,11
+217,     Hanang               ,56,     MN05     ,11
+218,     Kilosa      ,57,     MG01     ,12
+219,     Morogoro     ,58,     MG02     ,12
+220,     Kilombero     ,59,     MG03     ,12
+221,     Ulanga     ,60,     MG04     ,12
+222,     Malinyi     ,61,     MG05     ,12
+223,     Ifakara     ,62,     MG06     ,12
+224,     Mvomero     ,63,     MG07     ,12
+225,     Gairo     ,64,     MG08     ,12
+226,     Tarime     ,65,     MR01     ,13
+227,     Serengeti     ,66,     MR02     ,13
+228,     Musoma     ,67,     MR03     ,13
+229,     Bunda     ,68,     MR04     ,13
+230,     Butiama     ,69,     MR05     ,13
+231,     Rorya     ,70,     MR06     ,13
+232,     Mtwara     ,71,     MT01     ,14
+233,     Newala     ,72,     MT02     ,14
+234,     Masasi     ,73,     MT03     ,14
+235,     Tandahimba     ,74,     MT04     ,14
+236,     Nanyumbu     ,75,     MT05     ,14
+237,     Ukerewe     ,76,     MZ01     ,15
+238,     Magu     ,77,     MZ02     ,15
+239,     Nyamagana     ,78,     MZ03     ,15
+240,     Kwimba     ,79,     MZ04     ,15
+241,     Sengerema     ,80,     MZ05     ,15
+242,     Misungwi     ,81,     MZ06     ,15
+243,     Pemba North     ,82,     PN01     ,16
+244,     Wete - Pemba     ,83,     PN02     ,16
+245,     Micheweni - Pemba     ,84,     PN03     ,16
+246,     Pemba South     ,85,     PN04     ,16
+247,     Chakechake - Pemba     ,86,     PN05     ,16
+248,     Mikoani - Pemba     ,87,     PN06     ,16
+249,     Bagamoyo     ,88,     PW01     ,17
+250,     Kibaha     ,89,     PW02     ,17
+251,     Kisarawe     ,90,     PW03     ,17
+252,     Mkuranga     ,91,     PW04     ,17
+253,     Rufiji     ,92,     PW05     ,17
+254,     Mafia     ,93,     PW06     ,17
+255,     Kalambo     ,94,     RK01     ,18
+256,     Sumbawanga Rural     ,95,     RK02     ,18
+257,     Nkansi     ,96,     RK03     ,18
+258,     Tunduru     ,97,     RV01     ,19
+259,     Songea     ,98,     RV02     ,19
+260,     Nyasa     ,99,     RV03     ,19
+261,     Mbinga     ,100,     RV04     ,19
+262,     Namtumbo     ,101,     RV05     ,19
+263,     Iramba     ,102,     SG01     ,20
+264,     Singida     ,103,     SG02     ,20
+265,     Manyoni     ,104,     SG03     ,20
+266,     Ikungi     ,105,     SG04     ,20
+267,     Mkalama     ,106,     SG05     ,20
+268,     Kishapu     ,107,     SH01     ,21
+269,     Shinyanga     ,108,     SH03     ,21
+270,     Kahama     ,109,     SH04     ,21
+271,     Songwe     ,110,     SO01     ,22
+272,     Mbozi     ,111,     SO02     ,22
+273,     Momba     ,112,     SO03     ,22
+274,     Ileje     ,113,     SO04     ,22
+275,     Nzega     ,114,     TB01     ,23
+276,     Igunga     ,115,     TB02     ,23
+277,     Tabora Rural     ,116,     TB03     ,23
+278,     Urambo     ,117,     TB04     ,23
+279,     Sikonge     ,118,     TB05     ,23
+280,     Lushoto     ,119,     TN01     ,24
+281,     Korogwe     ,120,     TN02     ,24
+282,     Muheza     ,121,     TN03     ,24
+283,     Tanga     ,122,     TN04     ,24
+284,     Pangani     ,123,     TN05     ,24
+285,     Handeni      ,124,     TN06     ,24
+286,     Mkinga     ,125,     TN07     ,24
+287,     Kilindi     ,126,     TN08     ,24
+288,     Zanzibar North     ,127,     ZN00     ,25
+289,     Zanzibar North           A                ,128,     ZN01     ,25
+290,     Zanzibar North           B               ,129,     ZN02     ,25
+291,     Zanzibar South  Central     ,130,     ZS00     ,26
+292,     Zanzibar Central     ,131,     ZS01     ,26
+293,     Zanzibar South     ,132,     ZS02     ,26
+294,     Zanzibar Town  West     ,133,     ZT00     ,27
+295,     Zanzibar West      ,134,     ZT01     ,27
+296,     Zanzibar Town     ,135,     ZT02     ,27
+297,     Njombe     ,136,     NJ01     ,28
+298,     Ludewa      ,137,     NJ02     ,28
+299,     Makete     ,138,     NJ03     ,28
+300,     Wanging          ombe     ,139,     NJ04     ,28
+301,     Bariadi     ,140,     SI01     ,29
+302,     Busega     ,141,     SI03     ,29
+303,     Maswa     ,142,     SI04     ,29
+304,     Meatu     ,143,     SI05     ,29
+305,     Itilima     ,144,     SI06     ,29
+306,     Geita     ,145,     GT01     ,30
+307,     Bukombe     ,146,     GT02     ,30
+308,     Chato     ,147,     GT03     ,30
+309,     Mbongwe     ,148,     GT04     ,30
+310,     Nyang          hwale     ,149,     GT05     ,30
+311,     Karatu     ,150,     AR06     ,1
+312,     Nsimbo     ,151,     KT04     ,8
+313,     Mpimbwe     ,152,     KT05     ,8
+314,     Morogoro Vijijini     ,153,     MG09     ,12
+315,     Ilemela     ,154,     MZ07     ,15
+316,     Chalinze     ,155,     PW08     ,17
+317,     Kibiti     ,156,     PW07     ,17
+318,     Madaba     ,157,     RV06     ,19
+319,     Tabora     ,158,     TB06     ,23
+320,     Kaliua     ,159,     TB07     ,23
+321,     Busokelo     ,160,     MB06     ,10
+322,     Kakonko     ,162,     KG05     ,5
+370,     Arusha CC     ,163,     AR07     ,1

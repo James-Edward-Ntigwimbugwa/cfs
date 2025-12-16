@@ -1,0 +1,14 @@
+import graphene
+from django.db.models import Q
+from myapp_audit_logs.models import AuditLog
+from myapp_dto.audit_logs_dto import AuditLogFilterInput, AuditLogsResponseObject
+from myapp_dto_builders.audit_logs_builder import AuditLogBuilder
+from myapp_dto_builders.response_builder import get_paginated_data
+
+
+class Query(graphene.ObjectType):
+    get_audit_logs = graphene.Field(AuditLogsResponseObject, filtering=AuditLogFilterInput(), description="PERMISSIONS=['can_view_audit_logs']")
+
+    def resolve_get_audit_logs(self, info, filtering=None):
+        filters = Q()
+        return get_paginated_data(AuditLog, filters, AuditLogBuilder.get_audit_log_data, info)

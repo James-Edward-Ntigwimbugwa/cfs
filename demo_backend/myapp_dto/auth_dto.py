@@ -1,0 +1,102 @@
+import graphene
+from myapp_dto.accounts_dto import ProfileObject
+from myapp_dto.enums import RoleTyeEnum
+from myapp_dto.shared_dto import PageObject,ResponseObject
+from myapp_mixins.base_object import BaseFilteringObject, BaseObject
+
+#------PERMISSION-------
+class UserPermissionsObject(BaseObject):
+    permission_name=graphene.String()
+    permission_code=graphene.String()
+    is_global=graphene.Boolean()
+
+class UserPermissionResponseObject(graphene.ObjectType):
+    response=graphene.Field(ResponseObject)
+    data=graphene.List(UserPermissionsObject)
+
+class PermissionAssignRemoveInput(graphene.InputObjectType):
+    role_id=graphene.String(required=True)
+    assigned_permission=graphene.List(graphene.String)
+    removed_permission=graphene.List(graphene.String)
+
+#------PERMISSION GROUP-------
+
+class UserPermissionsGroupObject(BaseObject):
+    group_name=graphene.String()
+    group_description=graphene.String()
+    group_permission=graphene.List(UserPermissionsObject)
+
+class UserPermissionsGroupResponseObject(graphene.ObjectType):
+    response=graphene.Field(ResponseObject)
+    data=graphene.List(UserPermissionsGroupObject)
+
+class UserPermissionsFilterInput(graphene.InputObjectType):
+    is_global=graphene.Boolean()
+
+class UserrRoleFilterInput(BaseFilteringObject):
+    unique_id=graphene.String()
+    role_type=RoleTyeEnum()
+
+#-------ROLES------
+class UserRolesInputObject(graphene.InputObjectType):
+    unique_id = graphene.String()
+    role_name = graphene.String(required=True)
+    state_unique_id = graphene.String()
+    role_type = RoleTyeEnum()
+    permissions = graphene.List(graphene.String)
+
+
+class UserRolesObject(BaseObject):
+    role_name = graphene.String()
+    role_type = RoleTyeEnum()
+    role_description = graphene.String()
+    role_createddate = graphene.DateTime()
+    permissions = graphene.List(UserPermissionsObject)
+
+
+class UserRolesResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    page = graphene.Field(PageObject)
+    data = graphene.List(UserRolesObject)
+
+
+#------------USER ROLES PERMISSION------------------
+class UserRolesPermissionsInput(graphene.InputObjectType):
+    unique_id = graphene.String()
+    role_id = graphene.String()
+    permission_id = graphene.String()
+
+
+class UserRolesPermissionsObject(BaseObject):
+    role = graphene.Field(UserRolesObject)
+    permission = graphene.Field(UserPermissionsObject)
+    createddate = graphene.Date()
+
+
+class UserRolesPermissionsResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    data = graphene.List(UserRolesPermissionsObject)
+
+
+#---------------USER ROLES-------------
+class UsersAssignedRolesInput(graphene.InputObjectType):
+    unique_id = graphene.String()
+    role = graphene.String()
+    user = graphene.String()
+
+
+class UsersAssignedRolesObject(BaseObject):
+    role = graphene.Field(UserRolesObject)
+    profile = graphene.Field(ProfileObject)
+    createddate = graphene.Date()
+
+
+class UsersAssignedRolesResponseObject(graphene.ObjectType):
+    response = graphene.Field(ResponseObject)
+    data = graphene.List(UsersAssignedRolesObject)
+
+
+class MemberStateRoleInputObject(graphene.InputObjectType):
+    unique_id = graphene.String()
+    role = graphene.String(required=True)
+    member_state = graphene.String(required=True)

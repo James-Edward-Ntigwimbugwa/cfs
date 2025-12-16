@@ -1,0 +1,68 @@
+import inspect
+import logging
+from functools import wraps
+
+from django.core.cache import cache
+
+from myapp_utils.cache.manager import CacheKeyManager
+from myapp_utils.cache.utils import create_cache_key
+
+logger = logging.getLogger(__name__)
+
+
+def cached_resolver(
+    timeout: int = 300,
+    prefix: str = None,
+    category: str = None,
+    model=None,
+    condition=None,
+    vary_headers=('Accept-Language', 'User-Agent', 'Authorization'),
+):
+    """
+    Cache decorator for GraphQL resolvers, bound to a model for invalidation.
+
+    Args:
+        timeout (int): Cache timeout in seconds
+        prefix (str): Optional prefix for cache key
+        category (str): Explicit cache category (overrides model name)
+        model: Django model to watch for changes
+        condition: Callable(info) -> bool to decide whether to cache
+        vary_headers: Headers included in cache key
+    """
+
+    def decorator(resolver_func):
+        @wraps(resolver_func)
+        def wrapper(self, info, *args, **kwargs):
+            if condition and not condition(info):
+                return resolver_func(self, info, *args, **kwargs)
+
+            module = inspect.getmodule(resolver_func)
+            default_prefix = f'{module.__name__ if module else "unknown"}.{resolver_func.__qualname__}'
+            cache_prefix = prefix or default_prefix
+
+            try:
+                cache_key = create_cache_key(cache_prefix, args, kwargs, info, vary_headers)
+            except Exception as e:
+                logger.warning(f'Cache key generation failed: {e}')
+                return resolver_func(self, info, *args, **kwargs)
+            
+            # read from cache
+            try:
+                cached_result = cache.get(cache_key)
+                if cached_result is not None:
+                    return cached_result
+            except Exception as e:
+                logger.warning(f'Cache read failed: {e}')
+
+            # execute resolver and cache result
+            result = resolver_func(self, info, *args, **kwargs)
+            try:
+                cache.set(cache_key, result, timeout)
+            except Exception as e:
+                logger.warning(f'Cache write failed: {e}')
+
+            return result
+
+        return wrapper
+
+    return decorator

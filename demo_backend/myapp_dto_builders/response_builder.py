@@ -1,0 +1,229 @@
+import logging
+from typing import Any, Callable, Iterable, Optional, Type, TypeVar
+from django.core.paginator import Paginator
+from django.db.models import Q, QuerySet, Model, CharField, TextField, ForeignKey, OneToOneField
+import graphene
+import traceback
+
+from graphql import GraphQLList
+from myapp_dto.enums import TimeRanges
+from myapp_dto.shared_dto import PageObject, ResponseObject
+from graphql.type.definition import GraphQLList
+from myapp_dto.enums import TimeRanges
+from typing import Any, Callable, Iterable, Optional, Type, TypeVar
+
+logger = logging.getLogger(__name__)
+T = TypeVar('T', bound=Model)
+
+
+def apply_search_filter(queryset: QuerySet, search_term: str | None, include_related: bool = False, depth: int = 1):
+    if not search_term:
+        return queryset
+
+    model = queryset.model
+
+    def get_search_fields(model: Model, current_path='', current_depth=0):
+        if current_depth > depth:
+            return []
+
+        fields = []
+        for field in model._meta.get_fields():
+            if isinstance(field, (CharField, TextField)):
+                fields.append(f'{current_path}{field.name}')
+            elif include_related and isinstance(field, (ForeignKey, OneToOneField)):
+                fields.extend(get_search_fields(field.related_model, f'{current_path}{field.name}__', current_depth + 1))
+        return fields
+
+    search_fields = get_search_fields(model)
+    search_queries = [Q(**{field + '__icontains': search_term}) for field in search_fields]
+
+    query = Q()
+    for search_query in search_queries:
+        query |= search_query
+
+    return queryset.filter(query)
+
+
+def get_paginated_data(
+    model: Type[T],
+    filters: Q,
+    builder_function: Callable[[str, dict], Any],
+    info: graphene.types.ResolveInfo,
+    lookup: str = 'unique_id',
+    search_include_related: bool = False,
+    search_depth: int = 1,
+    custom_queryset: Optional[QuerySet] = None,
+    **kwargs,
+) -> Any:
+    """
+    Fetch, paginate, and build data for a given model class.
+
+    Args:
+        model: The Django model to query.
+        filters: Filters to apply to the queryset.
+        builder_function: Function to transform model objects.
+        info: GraphQL resolve info object.
+        lookup: Field to select in the queryset (default: 'unique_id').
+        search_include_related: Whether to include related models in search.
+        search_depth: Depth of related model search.
+        custom_queryset: Optional pre-filtered queryset.
+
+    Returns:
+        GraphQL response with paginated data.
+    """
+    filtering = info.variable_values.get('filtering', {})
+    search_term = filtering.get('search_term')
+    page_number = max(1, int(filtering.get('page_number', 1)))
+    items_per_page = int(filtering.get('page_size', 20))
+
+    queryset = custom_queryset or model.objects.filter(filters).distinct()
+
+    queryset = queryset.only(lookup)
+
+    if search_term:
+        try:
+            queryset = apply_search_filter(queryset, search_term, include_related=search_include_related, depth=search_depth)
+        except Exception as e:
+            traceback.print_exc()
+            return info.return_type.graphene_type(response=ResponseObject.get_response(id='8', message=str(e)))
+
+    try:
+        paginator = Paginator(queryset, items_per_page)
+
+        if page_number < 1 or page_number > paginator.num_pages:
+            return info.return_type.graphene_type(response=ResponseObject.get_response(id='26'))
+
+        page_obj = paginator.page(page_number)
+
+        data = list(builder_function(getattr(obj, lookup), **kwargs) for obj in page_obj)
+        page = PageObject.get_page(page_obj)
+
+        return info.return_type.graphene_type(response=ResponseObject.get_response(id='1'), page=page, data=data)
+
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f'Error fetching paginated data for {model.__name__}: {e}')
+        return info.return_type.graphene_type(response=ResponseObject.get_response(id='8', message=str(e)))
+
+def build_response(
+    model: Type[T],
+    filters: Q,
+    builder_function: Callable[[Any, dict], Any],
+    info: graphene.types.ResolveInfo,
+    lookup: str = 'unique_id',
+    search_include_related: bool = False,
+    search_depth: int = 1,
+    custom_queryset: Optional[QuerySet | list | Any] = None,
+    **kwargs,
+):
+    """
+    Fetch, paginate, and build data for a given model class.
+
+    Args:
+        model: The Django model to query.
+        filters: Filters to apply to the queryset.
+        builder_function: Function to transform model objects.
+        info: GraphQL resolve info object.
+        lookup: Field to select in the queryset (default: 'unique_id').
+        search_include_related: Whether to include related models in search.
+        search_depth: Depth of related model search.
+        custom_queryset: Optional pre-filtered queryset.
+
+    Returns:
+        GraphQL response with either pagination or non-paginated depending on if 'page' is in the graphene return object of the specific query data.
+    """
+
+    filtering = info.variable_values.get('filtering', {})
+
+    page_number = filtering.get('page_number', 1)
+    items_per_page = filtering.get('page_size', 20)
+    unique_id = filtering.get('unique_id')
+    is_active = filtering.get('is_active')  # noqa TODO: This should be implement to query level
+    time_range = filtering.get('time_range')
+    time_from = filtering.get('time_from')
+    time_to = filtering.get('time_to')
+    created_by = filtering.get('created_by')
+    search_term = filtering.get('keyword')
+
+    # Detect GraphQL return type
+    data_field = info.return_type.fields.get('data')
+    is_list_type = isinstance(data_field.type, GraphQLList)
+
+    try:
+        # 1. Prepare initial queryset or data
+        if custom_queryset is not None:
+            queryset = custom_queryset
+        elif model is not None:
+            queryset = model.objects.filter(filters).distinct().only(lookup)
+        else:
+            queryset = []
+
+        # 2. Apply filters (only if queryset is ORM-based)
+        if isinstance(queryset, QuerySet):
+            if unique_id:
+                filters &= Q(unique_id=unique_id)
+            # if is_active is not None:
+            #     filters &= Q(is_active=is_active)
+            if time_range:
+                date_time_range = TimeRanges.get_range(time_range)
+                filters &= Q(created_at__range=date_time_range)
+            if time_from:
+                filters &= Q(created_at__gte=time_from)
+            if time_to:
+                filters &= Q(created_at__lte=time_to)
+            if created_by:
+                filters &= Q(created_by__unique_id=created_by)
+
+            # Re-apply all filters to the queryset
+            queryset = model.objects.filter(filters).distinct().only(lookup)
+
+            # Apply search
+            if search_term:
+                try:
+                    queryset = apply_search_filter(
+                        queryset,
+                        search_term,
+                        include_related=search_include_related,
+                        depth=search_depth,
+                    )
+                except Exception as e:
+                    traceback.print_exc()
+                    logger.error(f'Search Error: {e}')
+
+        # 3. If schema expects single object → optimize by fetching only first()
+        if not is_list_type and isinstance(queryset, QuerySet):
+            obj = queryset.first()
+            built_data = builder_function(getattr(obj, lookup, obj), **kwargs) if obj else None
+            return info.return_type.graphene_type(response=ResponseObject.get_response(id='1'), data=built_data)
+
+        # 4. Otherwise, normalize into iterable
+        if isinstance(queryset, QuerySet):
+            data_source = queryset
+        elif isinstance(queryset, Iterable) and not isinstance(queryset, (str, bytes, dict)):
+            data_source = queryset
+        else:
+            data_source = [queryset]
+
+        # 5. Handle pagination if schema supports `page`
+        graphene_page_obj = info.return_type.fields.get('page', None)
+        if is_list_type and graphene_page_obj:
+            paginator = Paginator(data_source, items_per_page)
+
+            if page_number < 1 or page_number > paginator.num_pages:
+                return info.return_type.graphene_type(response=ResponseObject.get_response(id='216'))
+
+            page_obj = paginator.page(page_number)
+            built_data = [builder_function(getattr(obj, lookup, obj), **kwargs) for obj in page_obj]
+            page = PageObject.get_page(page_obj)
+
+            return info.return_type.graphene_type(response=ResponseObject.get_response(id='1'), page=page, data=built_data)
+
+        # 6. Build all data
+        built_data = [builder_function(getattr(obj, lookup, obj), **kwargs) for obj in data_source]
+        return info.return_type.graphene_type(response=ResponseObject.get_response(id='1'), data=built_data if is_list_type else (built_data[0] if built_data else None))
+
+    except Exception as e:
+        traceback.print_exc()
+        message = f'Error fetching data for {model.__name__ if model else "custom"}: {e}'
+        return info.return_type.graphene_type(response=ResponseObject.get_response(id='8', message=str(message)))
+
