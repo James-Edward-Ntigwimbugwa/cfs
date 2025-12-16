@@ -61,6 +61,12 @@ CORE_PACKAGES=(
     "weasyprint"     # HTML to PDF generation
     "xmltodict"      # XML to dictionary conversion
     "pyAesCrypt"     # AES file encryption
+    "graphene-django" #django_graphql
+    "django-debug-toolbar" #debugger
+    "django-oauth-toolkit" #oauth2
+    "Jinja2" #Python Jinja
+    "django-cors-middleware" #cors-middleware
+    "django-cors-headers>=4.3,<5.0"
 )
 for package in "${CORE_PACKAGES[@]}"; do
     echo -e "  ${YELLOW}→${NC} Installing $package..."
