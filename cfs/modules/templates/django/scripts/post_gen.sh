@@ -65,8 +65,13 @@ CORE_PACKAGES=(
     "weasyprint"     # HTML to PDF generation
     "xmltodict"      # XML to dictionary conversion
     "pyAesCrypt"     # AES file encryption
+    "graphene-django" #django_graphql
+    "django-debug-toolbar" #debugger
+    "django-oauth-toolkit" #oauth2
+    "Jinja2" #Python Jinja
     "graphene-django"
 )
+
 for package in "${CORE_PACKAGES[@]}"; do
     echo -e "  ${YELLOW}→${NC} Installing $package..."
     if pip install "$package" > /dev/null 2>&1; then

@@ -85,6 +85,7 @@ echo -e "${BLUE}Creating Django project structure...${NC}"
 
 # List of Django apps to create based on manifest
 APPS=(
+    "${PACKAGE_NAME}_accounts"
     "${PACKAGE_NAME}_assets"
     "${PACKAGE_NAME}_audit_logs"
     "${PACKAGE_NAME}_auth"
@@ -114,7 +115,6 @@ UTIL_DIRS=(
     "${PACKAGE_NAME}_mixins"
     "${PACKAGE_NAME}_htmls"
     "${PACKAGE_NAME}_utils"
-
 )
 
 for dir in "${UTIL_DIRS[@]}"; do
