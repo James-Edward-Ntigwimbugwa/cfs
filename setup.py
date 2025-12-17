@@ -11,7 +11,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="cfs",
+    name="cfs-cli",
     version="0.1.0",
     packages=find_packages(include=["cfs", "cfs.*"]),
     include_package_data=True,
@@ -25,7 +25,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "cfs=cfs.cli:main",
+            "cfs=cfs_cli.cli:main",
         ],
     },
 )

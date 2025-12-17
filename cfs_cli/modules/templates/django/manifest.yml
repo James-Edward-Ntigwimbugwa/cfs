@@ -767,7 +767,7 @@ structure:
   # ============================================================
   # 15: APPLICATION LOGS
   # ============================================================
-  - path: "{{ project_name }}{{ package_name }}/logs"
+  - path: "{{ project_name }}/{{ package_name }}_logs"
     type: dir
 
   - path: "{{ project_name }}/{{package_name}}_logs/debug.log"

@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Dict, Any, List
 
-from cfs.modules.templates.django.core.exceptions.django_exceptions import DjangoManifestValidationError
+from cfs_cli.modules.templates.django.core.exceptions.django_exceptions import DjangoManifestValidationError
 
 
 def _validate_computed_variables(computed: Dict[str, Any]) -> None:
