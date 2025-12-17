@@ -13,7 +13,7 @@ from typing import Tuple, Type, Any
 def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
     """
     Get framework-specific generator and manifest loader classes.
-    Uses match/case for framework selection .
+    Uses match/case for framework selection.
 
     Args:
         template_name: Name of the framework template
@@ -26,96 +26,82 @@ def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
     """
     match template_name:
         case "springboot":
-            try:
-                from cfs_cli.modules.templates.springboot.core.spring_generator import (
-                    SpringGenerator,
-                )
-                from cfs_cli.modules.templates.springboot.core.spring_manifest_loader import (
-                    SpringManifestLoader,
-                )
-
-                return SpringGenerator, SpringManifestLoader
-            except ImportError as e:
-                raise ImportError(f"Failed to load Spring Boot modules: {e}")
+            from cfs_cli.modules.templates.springboot.core.spring_generator import (
+                SpringGenerator,
+            )
+            from cfs_cli.modules.templates.springboot.core.spring_manifest_loader import (
+                SpringManifestLoader,
+            )
+            return SpringGenerator, SpringManifestLoader
+            
 
         case "flutter":
-            try:
-                from cfs_cli.modules.templates.flutter.core.flutter_generator import (
-                    FlutterGenerator,
-                )
-                from cfs_cli.modules.templates.flutter.core.flutter_manifest_loader import (
-                    FlutterManifestLoader,
-                )
-
-                return FlutterGenerator, FlutterManifestLoader
-            except ImportError as e:
-                raise ImportError(f"Failed to load Flutter modules: {e}")
+            from cfs_cli.modules.templates.flutter.core.flutter_generator import (
+                FlutterGenerator,
+            )
+            from cfs_cli.modules.templates.flutter.core.flutter_manifest_loader import (
+                FlutterManifestLoader,
+            )
+            return FlutterGenerator, FlutterManifestLoader
+        
 
         case "django":
-            try:
-                from cfs_cli.modules.templates.django.core.django_generator import (
-                    DjangoGenerator,
-                )
-                from cfs_cli.modules.templates.django.core.django_manifest_loader import (
-                    DjangoManifestLoader,
-                )
-
-                return DjangoGenerator, DjangoManifestLoader
-            except ImportError as e:
-                raise ImportError(f"Failed to load Django modules: {e}")
-
-        # case 'react':
-        #     try:
-        #         from cfs.modules.templates.react.core.react_generator import ReactGenerator
-        #         from cfs.modules.templates.react.core.react_manifest_loader import ReactManifestLoader
-        #         return ReactGenerator, ReactManifestLoader
-        #     except ImportError as e:
-        #         raise ImportError(f"Failed to load React modules: {e}")
-
-        # case 'nextjs':
-        #     try:
-        #         from cfs.modules.templates.nextjs.core.nextjs_generator import NextJSGenerator
-        #         from cfs.modules.templates.nextjs.core.nextjs_manifest_loader import NextJSManifestLoader
-        #         return NextJSGenerator, NextJSManifestLoader
-        #     except ImportError as e:
-        #         raise ImportError(f"Failed to load Next.js modules: {e}")
-
-        # case 'fastapi':
-        #     try:
-        #         from cfs.modules.templates.fastapi.core.fastapi_generator import FastAPIGenerator
-        #         from cfs.modules.templates.fastapi.core.fastapi_manifest_loader import FastAPIManifestLoader
-        #         return FastAPIGenerator, FastAPIManifestLoader
-        #     except ImportError as e:
-        #         raise ImportError(f"Failed to load FastAPI modules: {e}")
-
-        # case 'express':
-        #     try:
-        #         from cfs.modules.templates.express.core.express_generator import ExpressGenerator
-        #         from cfs.modules.templates.express.core.express_manifest_loader import ExpressManifestLoader
-        #         return ExpressGenerator, ExpressManifestLoader
-        #     except ImportError as e:
-        #         raise ImportError(f"Failed to load Express modules: {e}")
-
-        # case 'vue':
-        #     try:
-        #         from cfs.modules.templates.vue.core.vue_generator import VueGenerator
-        #         from cfs.modules.templates.vue.core.vue_manifest_loader import VueManifestLoader
-        #         return VueGenerator, VueManifestLoader
-        #     except ImportError as e:
-        #         raise ImportError(f"Failed to load Vue modules: {e}")
+            from cfs_cli.modules.templates.django.core.django_generator import (
+                DjangoGenerator,
+            )
+            from cfs_cli.modules.templates.django.core.django_manifest_loader import (
+                DjangoManifestLoader,
+            )
+            return DjangoGenerator, DjangoManifestLoader
 
         case _:
             raise ImportError(
                 f"Unknown template '{template_name}'. "
-                f"Supported frameworks: springboot, flutter, djangoe"
+                f"Supported frameworks: springboot, flutter, django"
             )
+
+
+def get_templates_directory() -> Path:
+    """
+    Get the templates directory, works both for installed package and local development.
+    
+    Returns:
+        Path to templates directory
+    """
+    # Try to find templates directory in installed package
+    try:
+        import cfs_cli
+        package_dir = Path(cfs_cli.__file__).parent
+        templates_dir = package_dir / "modules" / "templates"
+        if templates_dir.exists():
+            return templates_dir
+    except (ImportError, AttributeError):
+        pass
+    
+    # Fallback: look relative to this file (local development)
+    base_dir = Path(__file__).resolve().parent
+    templates_dir = base_dir / "modules" / "templates"
+    if templates_dir.exists():
+        return templates_dir
+    
+    # Last resort: check current working directory
+    cwd_templates = Path.cwd() / "modules" / "templates"
+    if cwd_templates.exists():
+        return cwd_templates
+    
+    raise FileNotFoundError(
+        "Could not locate templates directory. "
+        "Please ensure cfs_cli is properly installed."
+    )
 
 
 def list_available_templates() -> None:
     """List all available templates by scanning the templates directory."""
-    base_dir = Path(__file__).resolve().parent
-    templates_dir = (base_dir / "modules" / "templates").resolve()
-    print("--------- ", base_dir, "---------")
+    try:
+        templates_dir = get_templates_directory()
+    except FileNotFoundError as e:
+        click.echo(f"Error: {e}", err=True)
+        return
 
     if not templates_dir.exists():
         click.echo("No templates directory found.", err=True)
@@ -127,7 +113,6 @@ def list_available_templates() -> None:
             # Try to load manifest to get description
             try:
                 import yaml
-
                 with open(tpl / "manifest.yml", "r") as f:
                     manifest = yaml.safe_load(f)
                     description = manifest.get("description", "No description")
@@ -136,8 +121,18 @@ def list_available_templates() -> None:
                 click.echo(f"  • {tpl.name}", err=True)
 
 
+def get_version() -> str:
+    """Get version from package metadata or fallback to default."""
+    try:
+        from importlib.metadata import version
+        return version("cfs-cli")
+    except Exception:
+        # Fallback version for development
+        return "0.2.1"
+
+
 @click.group()
-@click.version_option(version="1.0.0", prog_name="CFS")
+@click.version_option(version=get_version(), prog_name="CFS")
 def main():
     """CFS - Common Folder Structure Generator
 
@@ -203,9 +198,15 @@ def init(
         cfs init react -p my-web-app
     """
 
-    # Get the templates directory
-    base_dir = Path(__file__).resolve().parent
-    template_path = (base_dir / "modules" / "templates" / template_name).resolve()
+    # Get the templates directory (works for both installed package and local dev)
+    try:
+        templates_dir = get_templates_directory()
+        template_path = templates_dir / template_name
+    except FileNotFoundError as e:
+        RED = "\033[91m"
+        RESET = "\033[0m"
+        click.echo(f"{RED}Error: {e}{RESET}", err=True)
+        sys.exit(1)
 
     RED = "\033[91m"
     GREEN = "\033[92m"
@@ -218,13 +219,20 @@ def init(
         list_available_templates()
         sys.exit(1)
 
+    if debug:
+        click.echo(f"Debug: Template path: {template_path}", err=True)
+        click.echo(f"Debug: Template exists: {template_path.exists()}", err=True)
+
     # Load framework-specific modules
     try:
         GeneratorClass, ManifestLoaderClass = get_framework_modules(template_name)
+        if debug:
+            click.echo(f"Debug: Loaded {GeneratorClass.__name__} and {ManifestLoaderClass.__name__}", err=True)
     except ImportError as e:
         click.echo(f"{RED}{e}{RESET}", err=True)
         if debug:
-            raise
+            import traceback
+            traceback.print_exc()
         sys.exit(1)
 
     # Create generator instance
@@ -238,7 +246,8 @@ def init(
     except Exception as e:
         click.echo(f"{RED}Error loading manifest: {e}{RESET}", err=True)
         if debug:
-            raise
+            import traceback
+            traceback.print_exc()
         sys.exit(1)
 
     # Collect variables (from options or prompt)
@@ -350,7 +359,8 @@ def init(
     except Exception as e:
         click.echo(f"\n{RED}❌ Error during generation: {e}{RESET}", err=True)
         if debug:
-            raise
+            import traceback
+            traceback.print_exc()
         sys.exit(1)
 
 
@@ -410,3 +420,4 @@ def list():
 
 if __name__ == "__main__":
     main()
+    

@@ -1,2 +1,0 @@
-[console_scripts]
-cfs = cfs_cli.cli:main

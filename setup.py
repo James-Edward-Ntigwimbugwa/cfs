@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="cfs-cli",                 
-    version="0.2.0",
+    version="0.2.1",
     packages=find_packages(include=["cfs_cli", "cfs_cli.*"]),
     include_package_data=True,
     package_data={

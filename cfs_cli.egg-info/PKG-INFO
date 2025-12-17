@@ -1,9 +1,0 @@
-Metadata-Version: 2.4
-Name: cfs-cli
-Version: 0.2.0
-License-File: LICENSE
-Requires-Dist: click
-Requires-Dist: jinja2
-Requires-Dist: pyyaml
-Dynamic: license-file
-Dynamic: requires-dist

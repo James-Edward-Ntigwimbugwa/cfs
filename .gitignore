@@ -10,3 +10,4 @@ demo_project/
 django_backend/
 demo_backend/
 dist/*
+cfs_cli.egg-info/

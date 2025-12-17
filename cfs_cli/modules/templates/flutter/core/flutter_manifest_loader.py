@@ -65,7 +65,7 @@ class FlutterManifestLoader:
             template_path: Path to the Flutter template directory
         """
         self.template_path = Path(template_path)
-        self.manifest_path = self.template_path / "manifest.yaml"
+        self.manifest_path = self.template_path / "manifest.yml"
         
     def load_manifest(self) -> Dict[str, Any]:
         """
