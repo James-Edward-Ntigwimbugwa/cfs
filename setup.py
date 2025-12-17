@@ -11,12 +11,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="cfs-cli",
-    version="0.1.0",
-    packages=find_packages(include=["cfs", "cfs.*"]),
+    name="cfs-cli",                 
+    version="0.2.0",
+    packages=find_packages(include=["cfs_cli", "cfs_cli.*"]),
     include_package_data=True,
     package_data={
-        "" : ["modules/templates/*/*"],
+        "": ["modules/templates/*/*"],
     },
     install_requires=[
         "click",
@@ -25,7 +25,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "cfs=cfs_cli.cli:main",
+            "cfs=cfs_cli.cli:main",  
         ],
     },
 )
+

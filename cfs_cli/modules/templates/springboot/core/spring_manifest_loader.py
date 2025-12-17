@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-from cfs_cli.modules.templates.springboot.core.exceptions.spring_manifest_validation_error import SpringManifestValidationError
+from .exceptions.spring_manifest_validation_error import SpringManifestValidationError
 
 
 def _validate_computed_variables(computed: Dict[str, Any]) -> None:

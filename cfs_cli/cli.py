@@ -25,66 +25,81 @@ def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
         ImportError: If framework modules cannot be loaded
     """
     match template_name:
-        case 'springboot':
+        case "springboot":
             try:
-                from cfs_cli.modules.templates.springboot.core.spring_generator import SpringGenerator
-                from cfs_cli.modules.templates.springboot.core.spring_manifest_loader import SpringManifestLoader
+                from cfs_cli.modules.templates.springboot.core.spring_generator import (
+                    SpringGenerator,
+                )
+                from cfs_cli.modules.templates.springboot.core.spring_manifest_loader import (
+                    SpringManifestLoader,
+                )
+
                 return SpringGenerator, SpringManifestLoader
             except ImportError as e:
                 raise ImportError(f"Failed to load Spring Boot modules: {e}")
 
-        case 'flutter':
+        case "flutter":
             try:
-                from cfs_cli.modules.templates.flutter.core.flutter_generator import FlutterGenerator
-                from cfs_cli.modules.templates.flutter.core.flutter_manifest_loader import FlutterManifestLoader
+                from cfs_cli.modules.templates.flutter.core.flutter_generator import (
+                    FlutterGenerator,
+                )
+                from cfs_cli.modules.templates.flutter.core.flutter_manifest_loader import (
+                    FlutterManifestLoader,
+                )
+
                 return FlutterGenerator, FlutterManifestLoader
             except ImportError as e:
                 raise ImportError(f"Failed to load Flutter modules: {e}")
 
-        case 'django':
+        case "django":
             try:
-                from cfs_cli.modules.templates.django.core.django_generator import DjangoGenerator
-                from cfs_cli.modules.templates.django.core.django_manifest_loader import DjangoManifestLoader
+                from cfs_cli.modules.templates.django.core.django_generator import (
+                    DjangoGenerator,
+                )
+                from cfs_cli.modules.templates.django.core.django_manifest_loader import (
+                    DjangoManifestLoader,
+                )
+
                 return DjangoGenerator, DjangoManifestLoader
             except ImportError as e:
                 raise ImportError(f"Failed to load Django modules: {e}")
 
         # case 'react':
         #     try:
-        #         from cfs_cli.modules.templates.react.core.react_generator import ReactGenerator
-        #         from cfs_cli.modules.templates.react.core.react_manifest_loader import ReactManifestLoader
+        #         from cfs.modules.templates.react.core.react_generator import ReactGenerator
+        #         from cfs.modules.templates.react.core.react_manifest_loader import ReactManifestLoader
         #         return ReactGenerator, ReactManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load React modules: {e}")
 
         # case 'nextjs':
         #     try:
-        #         from cfs_cli.modules.templates.nextjs.core.nextjs_generator import NextJSGenerator
-        #         from cfs_cli.modules.templates.nextjs.core.nextjs_manifest_loader import NextJSManifestLoader
+        #         from cfs.modules.templates.nextjs.core.nextjs_generator import NextJSGenerator
+        #         from cfs.modules.templates.nextjs.core.nextjs_manifest_loader import NextJSManifestLoader
         #         return NextJSGenerator, NextJSManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load Next.js modules: {e}")
 
         # case 'fastapi':
         #     try:
-        #         from cfs_cli.modules.templates.fastapi.core.fastapi_generator import FastAPIGenerator
-        #         from cfs_cli.modules.templates.fastapi.core.fastapi_manifest_loader import FastAPIManifestLoader
+        #         from cfs.modules.templates.fastapi.core.fastapi_generator import FastAPIGenerator
+        #         from cfs.modules.templates.fastapi.core.fastapi_manifest_loader import FastAPIManifestLoader
         #         return FastAPIGenerator, FastAPIManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load FastAPI modules: {e}")
 
         # case 'express':
         #     try:
-        #         from cfs_cli.modules.templates.express.core.express_generator import ExpressGenerator
-        #         from cfs_cli.modules.templates.express.core.express_manifest_loader import ExpressManifestLoader
+        #         from cfs.modules.templates.express.core.express_generator import ExpressGenerator
+        #         from cfs.modules.templates.express.core.express_manifest_loader import ExpressManifestLoader
         #         return ExpressGenerator, ExpressManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load Express modules: {e}")
 
         # case 'vue':
         #     try:
-        #         from cfs_cli.modules.templates.vue.core.vue_generator import VueGenerator
-        #         from cfs_cli.modules.templates.vue.core.vue_manifest_loader import VueManifestLoader
+        #         from cfs.modules.templates.vue.core.vue_generator import VueGenerator
+        #         from cfs.modules.templates.vue.core.vue_manifest_loader import VueManifestLoader
         #         return VueGenerator, VueManifestLoader
         #     except ImportError as e:
         #         raise ImportError(f"Failed to load Vue modules: {e}")
@@ -99,8 +114,8 @@ def get_framework_modules(template_name: str) -> Tuple[Type, Type]:
 def list_available_templates() -> None:
     """List all available templates by scanning the templates directory."""
     base_dir = Path(__file__).resolve().parent
-    templates_dir = (base_dir / 'modules' / 'templates').resolve()
-    print('--------- ', base_dir, '---------')
+    templates_dir = (base_dir / "modules" / "templates").resolve()
+    print("--------- ", base_dir, "---------")
 
     if not templates_dir.exists():
         click.echo("No templates directory found.", err=True)
@@ -108,20 +123,21 @@ def list_available_templates() -> None:
 
     click.echo("\nAvailable templates:", err=True)
     for tpl in sorted(templates_dir.iterdir()):
-        if tpl.is_dir() and (tpl / 'manifest.yml').exists():
+        if tpl.is_dir() and (tpl / "manifest.yml").exists():
             # Try to load manifest to get description
             try:
                 import yaml
-                with open(tpl / 'manifest.yml', 'r') as f:
+
+                with open(tpl / "manifest.yml", "r") as f:
                     manifest = yaml.safe_load(f)
-                    description = manifest.get('description', 'No description')
+                    description = manifest.get("description", "No description")
                     click.echo(f"  • {tpl.name:15} - {description}", err=True)
             except:
                 click.echo(f"  • {tpl.name}", err=True)
 
 
 @click.group()
-@click.version_option(version='1.0.0', prog_name='CFS')
+@click.version_option(version="1.0.0", prog_name="CFS")
 def main():
     """CFS - Common Folder Structure Generator
 
@@ -134,22 +150,48 @@ def main():
 
 
 @main.command()
-@click.argument('template_name')
-@click.option('--project-name', '-p', help='Name of the project')
-@click.option('--package-name', help='Base package name (for Java/Kotlin/Django projects)')
-@click.option('--language', '-l', help='Programming language (e.g., java, kt, ts)')
-@click.option('--api-protocol', '-a', help='API protocol (e.g., rest, graphql, websocket)')
-@click.option('--database-engine', '-d', help='Database engine (for Django: postgresql, mysql, sqlite)')
-@click.option('--python-version', help='Python version (for Django: 3.9, 3.10, 3.11, 3.12)')
-@click.option('--use-graphql', is_flag=True, help='Include GraphQL support (Django)')
-@click.option('--use-celery', is_flag=True, help='Include Celery for async tasks (Django)')
-@click.option('--output-dir', '-o', default='.', help='Output directory (default: current)')
-@click.option('--force', '-f', is_flag=True, help='Overwrite existing files')
-@click.option('--dry-run', is_flag=True, help='Preview without creating files')
-@click.option('--debug', is_flag=True, help='Show debug information')
-def init(template_name, project_name, package_name, language, api_protocol,
-         database_engine, python_version, use_graphql, use_celery,
-         output_dir, force, dry_run, debug):
+@click.argument("template_name")
+@click.option("--project-name", "-p", help="Name of the project")
+@click.option(
+    "--package-name", help="Base package name (for Java/Kotlin/Django projects)"
+)
+@click.option("--language", "-l", help="Programming language (e.g., java, kt, ts)")
+@click.option(
+    "--api-protocol", "-a", help="API protocol (e.g., rest, graphql, websocket)"
+)
+@click.option(
+    "--database-engine",
+    "-d",
+    help="Database engine (for Django: postgresql, mysql, sqlite)",
+)
+@click.option(
+    "--python-version", help="Python version (for Django: 3.9, 3.10, 3.11, 3.12)"
+)
+@click.option("--use-graphql", is_flag=True, help="Include GraphQL support (Django)")
+@click.option(
+    "--use-celery", is_flag=True, help="Include Celery for async tasks (Django)"
+)
+@click.option(
+    "--output-dir", "-o", default=".", help="Output directory (default: current)"
+)
+@click.option("--force", "-f", is_flag=True, help="Overwrite existing files")
+@click.option("--dry-run", is_flag=True, help="Preview without creating files")
+@click.option("--debug", is_flag=True, help="Show debug information")
+def init(
+    template_name,
+    project_name,
+    package_name,
+    language,
+    api_protocol,
+    database_engine,
+    python_version,
+    use_graphql,
+    use_celery,
+    output_dir,
+    force,
+    dry_run,
+    debug,
+):
     """Initialize a new project from a framework template.
 
     TEMPLATE_NAME: The framework template to use
@@ -163,7 +205,7 @@ def init(template_name, project_name, package_name, language, api_protocol,
 
     # Get the templates directory
     base_dir = Path(__file__).resolve().parent
-    template_path = (base_dir / 'modules' / 'templates' / template_name).resolve()
+    template_path = (base_dir / "modules" / "templates" / template_name).resolve()
 
     RED = "\033[91m"
     GREEN = "\033[92m"
@@ -201,64 +243,64 @@ def init(template_name, project_name, package_name, language, api_protocol,
 
     # Collect variables (from options or prompt)
     variables = {}
-    manifest_vars = manifest.get('variables', {})
+    manifest_vars = manifest.get("variables", {})
 
     for var_name, var_config in manifest_vars.items():
         # Check if provided via CLI
         cli_value = None
 
         # Map CLI options to variable names
-        if var_name == 'project_name':
+        if var_name == "project_name":
             cli_value = project_name
-        elif var_name == 'package_name':
+        elif var_name == "package_name":
             cli_value = package_name
-        elif var_name == 'language':
+        elif var_name == "language":
             cli_value = language
-        elif var_name == 'api_protocol':
+        elif var_name == "api_protocol":
             cli_value = api_protocol
-        elif var_name == 'database_engine':
+        elif var_name == "database_engine":
             cli_value = database_engine
-        elif var_name == 'python_version':
+        elif var_name == "python_version":
             cli_value = python_version
-        elif var_name == 'use_graphql':
+        elif var_name == "use_graphql":
             cli_value = use_graphql if use_graphql else None
-        elif var_name == 'use_celery':
+        elif var_name == "use_celery":
             cli_value = use_celery if use_celery else None
 
         if cli_value is not None:
             variables[var_name] = cli_value
         else:
             # Prompt for value
-            var_type = var_config.get('type', 'string')
-            var_default = var_config.get('default')
-            var_prompt = var_config.get('prompt', var_name.replace('_', ' ').title())
-            var_choices = var_config.get('choices')
+            var_type = var_config.get("type", "string")
+            var_default = var_config.get("default")
+            var_prompt = var_config.get("prompt", var_name.replace("_", " ").title())
+            var_choices = var_config.get("choices")
 
             if var_choices:
                 # Format choices for display
-                choices_str = ', '.join(var_choices)
+                choices_str = ", ".join(var_choices)
                 variables[var_name] = click.prompt(
                     f"{var_prompt} ({choices_str})",
                     type=click.Choice(var_choices),
                     default=var_default,
-                    show_choices=False
+                    show_choices=False,
                 )
-            elif var_type == 'boolean':
+            elif var_type == "boolean":
                 variables[var_name] = click.confirm(
                     var_prompt,
-                    default=var_default if var_default is not None else False
+                    default=var_default if var_default is not None else False,
                 )
             else:
                 variables[var_name] = click.prompt(
                     var_prompt,
                     default=var_default if var_default else None,
-                    show_default=True if var_default else False
+                    show_default=True if var_default else False,
                 )
 
     # Display what will be created
     click.echo(f"{BLUE}📦 Generating {template_name} project:{RESET}")
     for key, value in variables.items():
-        display_key = key.replace('_', ' ').title()
+        display_key = key.replace("_", " ").title()
         click.echo(f"   {display_key}: {GREEN}{value}{RESET}")
     click.echo(f"   Output directory: {GREEN}{output_dir}{RESET}\n")
 
@@ -271,30 +313,36 @@ def init(template_name, project_name, package_name, language, api_protocol,
             variables=variables,
             output_dir=Path(output_dir),
             force=force,
-            dry_run=dry_run
+            dry_run=dry_run,
         )
 
         if dry_run:
             click.echo(f"{YELLOW}Would create:{RESET}")
-            for item in result['would_create']:
+            for item in result["would_create"]:
                 click.echo(f"{YELLOW}   ✓ {item}{RESET}")
         else:
-            if result['created']:
+            if result["created"]:
                 click.echo(f"{GREEN}✨ Created files:{RESET}")
-                for item in result['created'][:10]:  # Show first 10
+                for item in result["created"][:10]:  # Show first 10
                     click.echo(f"{GREEN}   ✓ {item}{RESET}")
-                if len(result['created']) > 10:
-                    click.echo(f"{GREEN}   ... and {len(result['created']) - 10} more files{RESET}")
+                if len(result["created"]) > 10:
+                    click.echo(
+                        f"{GREEN}   ... and {len(result['created']) - 10} more files{RESET}"
+                    )
 
-            if result.get('skipped'):
+            if result.get("skipped"):
                 click.echo(f"\n{YELLOW}Skipped (already exist):{RESET}")
-                for item in result['skipped'][:5]:  # Show first 5
+                for item in result["skipped"][:5]:  # Show first 5
                     click.echo(f"{YELLOW}   - {item}{RESET}")
-                if len(result['skipped']) > 5:
-                    click.echo(f"{YELLOW}   ... and {len(result['skipped']) - 5} more files{RESET}")
+                if len(result["skipped"]) > 5:
+                    click.echo(
+                        f"{YELLOW}   ... and {len(result['skipped']) - 5} more files{RESET}"
+                    )
 
-        project_dir = Path(output_dir) / variables.get('project_name', '')
-        click.echo(f"\n{GREEN}🎉 Done! Your {template_name} project is ready at: {project_dir}{RESET}\n")
+        project_dir = Path(output_dir) / variables.get("project_name", "")
+        click.echo(
+            f"\n{GREEN}🎉 Done! Your {template_name} project is ready at: {project_dir}{RESET}\n"
+        )
 
         # Show next steps based on framework
         show_next_steps(template_name, variables)
@@ -315,34 +363,36 @@ def show_next_steps(template_name: str, variables: dict) -> None:
     click.echo(f"{CYAN}📋 Next steps:{RESET}")
 
     match template_name:
-        case 'springboot':
+        case "springboot":
             click.echo(f"{YELLOW}   1. cd into your project directory{RESET}")
             click.echo(f"{YELLOW}   2. Run: ./mvnw spring-boot:run{RESET}")
             click.echo(f"{YELLOW}   3. Open http://localhost:8080{RESET}")
 
-        case 'flutter':
+        case "flutter":
             click.echo(f"{YELLOW}   1. cd into your project directory{RESET}")
             click.echo(f"{YELLOW}   2. Run: flutter pub get{RESET}")
             click.echo(f"{YELLOW}   3. Run: flutter run{RESET}")
 
-        case 'django':
-            project_name = variables.get('project_name', 'django_backend')
+        case "django":
+            project_name = variables.get("project_name", "django_backend")
             click.echo(f"{YELLOW}   1. cd {project_name}{RESET}")
             click.echo(f"{YELLOW}   2. source venv/bin/activate{RESET}")
-            click.echo(f"{YELLOW}   3. # Configure .env file with database credentials{RESET}")
+            click.echo(
+                f"{YELLOW}   3. # Configure .env file with database credentials{RESET}"
+            )
             click.echo(f"{YELLOW}   4. python manage.py runserver{RESET}")
 
-        case 'react':
+        case "react":
             click.echo(f"{YELLOW}   1. cd into your project directory{RESET}")
             click.echo(f"{YELLOW}   2. Run: npm install{RESET}")
             click.echo(f"{YELLOW}   3. Run: npm start{RESET}")
 
-        case 'nextjs':
+        case "nextjs":
             click.echo(f"{YELLOW}   1. cd into your project directory{RESET}")
             click.echo(f"{YELLOW}   2. Run: npm install{RESET}")
             click.echo(f"{YELLOW}   3. Run: npm run dev{RESET}")
 
-        case 'fastapi':
+        case "fastapi":
             click.echo(f"{YELLOW}   1. cd into your project directory{RESET}")
             click.echo(f"{YELLOW}   2. Run: pip install -r requirements.txt{RESET}")
             click.echo(f"{YELLOW}   3. Run: uvicorn main:app --reload{RESET}")
@@ -358,5 +408,5 @@ def list():
     list_available_templates()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

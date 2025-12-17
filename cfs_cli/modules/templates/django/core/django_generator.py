@@ -8,7 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import Dict, Any, List
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
-from cfs_cli.modules.templates.django.core.exceptions.django_exceptions import DjangoGeneratorError
+from .exceptions.django_exceptions import DjangoGeneratorError
 
 
 def _check_python_installed() -> bool:

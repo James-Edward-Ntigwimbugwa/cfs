@@ -1,0 +1,3 @@
+recursive-include cfs_cli/modules/templates *.j2
+recursive-include cfs_cli/scripts *.sh
+recursive-include cfs_cli/config *.yaml *.yml
